@@ -1,0 +1,114 @@
+# =========================
+
+# OS / Sistema
+
+# =========================
+
+.DS_Store
+Thumbs.db
+*~
+*.swp
+
+# =========================
+
+# Logs
+
+# =========================
+
+*.log
+logs/
+*.out
+*.err
+
+# =========================
+
+# Java / Gradle
+
+# =========================
+
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# =========================
+
+# IntelliJ / JetBrains
+
+# =========================
+
+.idea/
+*.iml
+out/
+
+# =========================
+
+# VSCode
+
+# =========================
+
+.vscode/
+
+# =========================
+
+# Node (si usas tooling)
+
+# =========================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+
+# Docker
+
+# =========================
+
+.docker/
+docker-compose.override.yml
+
+# =========================
+
+# Env / Secrets
+
+# =========================
+
+.env
+.env.*
+*.env
+secrets/
+*.key
+*.pem
+
+# =========================
+
+# Test / Reports
+
+# =========================
+
+reports/
+coverage/
+*.exec
+
+# =========================
+
+# Archivos generados
+
+# =========================
+
+*.class
+*.jar
+*.war
+*.ear
+
+# =========================
+
+# OpenAPI / Swagger (opcional)
+
+# =========================
+
+generated/
+swagger-ui/
