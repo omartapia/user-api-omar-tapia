@@ -22,25 +22,32 @@ logs/
 
 # =========================
 
-# Java / Gradle
+# Java / Build
 
 # =========================
 
 build/
+target/
 .gradle/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+out/
+
+# Archivos compilados
+
+*.class
+*.jar
+*.war
+*.ear
 
 # =========================
 
-# IntelliJ / JetBrains
+# IntelliJ IDEA (TODO lo generado)
 
 # =========================
 
 .idea/
 *.iml
-out/
+*.ipr
+*.iws
 
 # =========================
 
@@ -92,23 +99,22 @@ secrets/
 reports/
 coverage/
 *.exec
+karate-reports/
 
 # =========================
 
-# Archivos generados
-
-# =========================
-
-*.class
-*.jar
-*.war
-*.ear
-
-# =========================
-
-# OpenAPI / Swagger (opcional)
+# OpenAPI / Generados
 
 # =========================
 
 generated/
 swagger-ui/
+
+# =========================
+
+# Otros
+
+# =========================
+
+*.tmp
+*.bak
