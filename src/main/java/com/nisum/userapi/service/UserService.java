@@ -28,7 +28,6 @@ public class UserService {
     public Mono<User> create(User user) {
         user.setToken(jwtService.generate(user.getEmail()));
         LocalDateTime now = LocalDateTime.now();
-        user.setId(UUID.randomUUID());
         user.setCreated(now);
         user.setModified(now);
         user.setLastLogin(now);

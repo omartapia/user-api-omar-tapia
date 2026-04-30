@@ -19,6 +19,7 @@ public interface UserMapper {
 
 
  @Mapping(target = "id", ignore = true)
+ @Mapping(target = "userId", ignore = true)
  Phone toPhoneEntity(PhoneRequest request);
 
  List<Phone> toListPhoneEntity(List<PhoneRequest> request);
@@ -33,6 +34,7 @@ public interface UserMapper {
  User toEntity(UserRequest request);
 
  @Mapping(target = "isactive", source = "active")
+ @Mapping(target = "phones", ignore = true)
  UserResponse toResponse(User user);
 
  default OffsetDateTime map(LocalDateTime value) {
