@@ -1,0 +1,18 @@
+CLIENT
+  |
+  v
+REST CONTROLLER
+  |
+  v
+SERVICE LAYER
+  |
+  v
+REPOSITORY (JPA)
+  |
+  v
+H2 DATABASE
+
+Cross-cutting:
+- JWT Filter
+- ControllerAdvice
+- Swagger

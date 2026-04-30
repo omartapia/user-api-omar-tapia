@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: ''
+  jpa:
+    hibernate:
+      ddl-auto: update
+nisum:
+  jwt:
+    secret: bebf8157-2c41-43a5-9fc3-b2d7bb6dac7f
+    ttl: 3600000 # una hora en segundos
