@@ -1,6 +1,5 @@
 # User API WebFlux + JWT
 
-Cumple el PDF:
 - WebFlux
 - CRUD H2
 - @Valid
