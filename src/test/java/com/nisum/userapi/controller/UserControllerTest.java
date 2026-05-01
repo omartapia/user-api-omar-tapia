@@ -1,10 +1,13 @@
 package com.nisum.userapi.controller;
 
+import com.nisum.userapi.application.usecase.CreateUserUseCase;
+import com.nisum.userapi.application.usecase.ListUsersUseCase;
+import com.nisum.userapi.application.usecase.GetUserUseCase;
+import com.nisum.userapi.application.usecase.DeleteUserUseCase;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
 import com.nisum.userapi.mapper.UserMapper;
 import com.nisum.userapi.model.User;
-import com.nisum.userapi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +30,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
     @Mock
-    private UserServiceImpl service;
+    private CreateUserUseCase createUserUseCase;
+    @Mock
+    private ListUsersUseCase listUsersUseCase;
+    @Mock
+    private GetUserUseCase getUserUseCase;
+    @Mock
+    private DeleteUserUseCase deleteUserUseCase;
 
     @Mock
     private UserMapper mapper;
@@ -43,7 +52,7 @@ class UserControllerTest {
         User saved = new User();
         UserResponse response = new UserResponse();
         when(mapper.toEntity(request)).thenReturn(entity);
-        when(service.create(entity)).thenReturn(Mono.just(saved));
+        when(createUserUseCase.create(entity)).thenReturn(Mono.just(saved));
         when(mapper.toResponse(saved)).thenReturn(response);
 
         // when
@@ -65,7 +74,7 @@ class UserControllerTest {
         User secondUser = new User();
         UserResponse firstResponse = new UserResponse();
         UserResponse secondResponse = new UserResponse();
-        when(service.list()).thenReturn(Flux.just(firstUser, secondUser));
+        when(listUsersUseCase.list()).thenReturn(Flux.just(firstUser, secondUser));
         when(mapper.toResponse(firstUser)).thenReturn(firstResponse);
         when(mapper.toResponse(secondUser)).thenReturn(secondResponse);
 
@@ -89,7 +98,7 @@ class UserControllerTest {
         UUID id = UUID.randomUUID();
         User user = new User();
         UserResponse response = new UserResponse();
-        when(service.get(id)).thenReturn(Mono.just(user));
+        when(getUserUseCase.get(id)).thenReturn(Mono.just(user));
         when(mapper.toResponse(user)).thenReturn(response);
 
         // when
@@ -108,7 +117,7 @@ class UserControllerTest {
     void givenMissingUserIdWhenGetUserThenReturnsNotFound() {
         // given
         UUID id = UUID.randomUUID();
-        when(service.get(id)).thenReturn(Mono.empty());
+        when(getUserUseCase.get(id)).thenReturn(Mono.empty());
 
         // when
         Mono<ResponseEntity<UserResponse>> result = controller.getUserById(id, null);
@@ -123,7 +132,7 @@ class UserControllerTest {
     void givenExistingUserIdWhenDeleteUserThenReturnsOk() {
         // given
         UUID id = UUID.randomUUID();
-        when(service.delete(id)).thenReturn(Mono.empty());
+        when(deleteUserUseCase.delete(id)).thenReturn(Mono.empty());
 
         // when
         Mono<ResponseEntity<Void>> result = controller.deleteUser(id, null);
@@ -132,6 +141,6 @@ class UserControllerTest {
         StepVerifier.create(result)
                 .assertNext(entityResponse -> assertThat(entityResponse.getStatusCode()).isEqualTo(HttpStatus.OK))
                 .verifyComplete();
-        verify(service).delete(id);
+        verify(deleteUserUseCase).delete(id);
     }
 }

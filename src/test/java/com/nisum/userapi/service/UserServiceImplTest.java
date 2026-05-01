@@ -1,12 +1,12 @@
 package com.nisum.userapi.service;
 
+import com.nisum.userapi.application.port.out.PhonePersistencePort;
+import com.nisum.userapi.application.port.out.UserPersistencePort;
+import com.nisum.userapi.application.service.UserApplicationService;
 import com.nisum.userapi.exception.UserApiException;
 import com.nisum.userapi.model.Phone;
 import com.nisum.userapi.model.User;
-import com.nisum.userapi.repository.PhoneRepository;
-import com.nisum.userapi.repository.UserRepository;
-import com.nisum.userapi.service.impl.JwtServiceImpl;
-import com.nisum.userapi.service.impl.UserServiceImpl;
+import com.nisum.userapi.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,15 +25,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+class UserApplicationServiceTest {
     @Mock
-    private UserRepository repository;
+    private UserPersistencePort repository;
     @Mock
-    private PhoneRepository phoneRepository;
+    private PhonePersistencePort phoneRepository;
     @Mock
-    private JwtServiceImpl jwtServiceImpl;
+    private JwtService jwtService;
     @InjectMocks
-    private UserServiceImpl service;
+    private UserApplicationService service;
 
     @Test
     void givenUserWithoutTokenWhenCreateUserThenSavesUserWithToken() {
@@ -42,7 +42,7 @@ class UserServiceImplTest {
         user.setPhones(new ArrayList<>());
 
         user.setEmail("omar@example.com");
-        when(jwtServiceImpl.generate("omar@example.com")).thenReturn("jwt-token");
+        when(jwtService.generate("omar@example.com")).thenReturn("jwt-token");
         when(repository.save(user)).thenReturn(Mono.just(user));
         // phoneRepository.save is used by persistPhones; for empty phones list it won't be called
 
@@ -55,7 +55,7 @@ class UserServiceImplTest {
                     assertThat(saved).isSameAs(user);
                 })
                 .verifyComplete();
-        verify(jwtServiceImpl).generate("omar@example.com");
+        verify(jwtService).generate("omar@example.com");
         verify(repository).save(user);
     }
 
