@@ -1,9 +1,9 @@
-package com.nisum.userapi.mapper.infrastructure.adapter;
+package com.nisum.userapi.infrastructure.adapter;
 
 import com.nisum.userapi.application.port.out.PhonePersistencePort;
 import com.nisum.userapi.application.port.out.UserPersistencePort;
-import com.nisum.userapi.mapper.infrastructure.repository.PhoneRepository;
-import com.nisum.userapi.mapper.infrastructure.repository.UserRepository;
+import com.nisum.userapi.infrastructure.repository.PhoneRepository;
+import com.nisum.userapi.infrastructure.repository.UserRepository;
 import com.nisum.userapi.model.Phone;
 import com.nisum.userapi.model.User;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,8 +1,8 @@
-package com.nisum.userapi.mapper.infrastructure.adapter;
+package com.nisum.userapi.infrastructure.adapter;
 
 import com.nisum.userapi.application.port.out.UserPersistencePort;
 import com.nisum.userapi.model.User;
-import com.nisum.userapi.mapper.infrastructure.repository.UserRepository;
+import com.nisum.userapi.infrastructure.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;

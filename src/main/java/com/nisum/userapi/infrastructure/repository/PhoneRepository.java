@@ -1,4 +1,4 @@
-package com.nisum.userapi.mapper.infrastructure.repository;
+package com.nisum.userapi.infrastructure.repository;
 
 import com.nisum.userapi.model.Phone;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
