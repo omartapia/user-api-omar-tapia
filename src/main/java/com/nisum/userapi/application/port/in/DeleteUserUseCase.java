@@ -1,4 +1,4 @@
-package com.nisum.userapi.application.usecase;
+package com.nisum.userapi.application.port.in;
 
 import reactor.core.publisher.Mono;
 

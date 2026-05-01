@@ -1,15 +1,15 @@
-package com.nisum.userapi.controller;
+package com.nisum.userapi.infrastructure.input.rest;
 
 import com.nisum.userapi.api.UsersApi;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
 import com.nisum.userapi.mapper.UserMapper;
-import com.nisum.userapi.application.usecase.CreateUserUseCase;
-import com.nisum.userapi.application.usecase.ListUsersUseCase;
-import com.nisum.userapi.application.usecase.GetUserUseCase;
-import com.nisum.userapi.application.usecase.DeleteUserUseCase;
-import com.nisum.userapi.application.usecase.UpdateUserUseCase;
-import com.nisum.userapi.application.usecase.PatchUserUseCase;
+import com.nisum.userapi.application.port.in.CreateUserUseCase;
+import com.nisum.userapi.application.port.in.ListUsersUseCase;
+import com.nisum.userapi.application.port.in.GetUserUseCase;
+import com.nisum.userapi.application.port.in.DeleteUserUseCase;
+import com.nisum.userapi.application.port.in.UpdateUserUseCase;
+import com.nisum.userapi.application.port.in.PatchUserUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

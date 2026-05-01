@@ -1,9 +1,9 @@
 package com.nisum.userapi.controller;
 
-import com.nisum.userapi.application.usecase.CreateUserUseCase;
-import com.nisum.userapi.application.usecase.ListUsersUseCase;
-import com.nisum.userapi.application.usecase.GetUserUseCase;
-import com.nisum.userapi.application.usecase.DeleteUserUseCase;
+import com.nisum.userapi.application.port.in.CreateUserUseCase;
+import com.nisum.userapi.application.port.in.ListUsersUseCase;
+import com.nisum.userapi.application.port.in.GetUserUseCase;
+import com.nisum.userapi.application.port.in.DeleteUserUseCase;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
 import com.nisum.userapi.mapper.UserMapper;

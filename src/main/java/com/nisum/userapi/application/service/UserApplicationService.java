@@ -2,12 +2,12 @@ package com.nisum.userapi.application.service;
 
 import com.nisum.userapi.application.port.out.PhonePersistencePort;
 import com.nisum.userapi.application.port.out.UserPersistencePort;
-import com.nisum.userapi.application.usecase.CreateUserUseCase;
-import com.nisum.userapi.application.usecase.ListUsersUseCase;
-import com.nisum.userapi.application.usecase.GetUserUseCase;
-import com.nisum.userapi.application.usecase.DeleteUserUseCase;
-import com.nisum.userapi.application.usecase.UpdateUserUseCase;
-import com.nisum.userapi.application.usecase.PatchUserUseCase;
+import com.nisum.userapi.application.port.in.CreateUserUseCase;
+import com.nisum.userapi.application.port.in.ListUsersUseCase;
+import com.nisum.userapi.application.port.in.GetUserUseCase;
+import com.nisum.userapi.application.port.in.DeleteUserUseCase;
+import com.nisum.userapi.application.port.in.UpdateUserUseCase;
+import com.nisum.userapi.application.port.in.PatchUserUseCase;
 import com.nisum.userapi.exception.UserApiException;
 import com.nisum.userapi.model.Phone;
 import com.nisum.userapi.model.User;
