@@ -1,4 +1,4 @@
-package com.nisum.userapi.infrastructure.repository;
+package com.nisum.userapi.mapper.infrastructure.repository;
 
 import com.nisum.userapi.model.User;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;

@@ -1,4 +1,4 @@
-package com.nisum.userapi.infrastructure.adapter;
+package com.nisum.userapi.mapper.infrastructure.adapter;
 
 import com.nisum.userapi.application.port.out.JwtPort;
 import com.nisum.userapi.config.JwtConfigProperties;

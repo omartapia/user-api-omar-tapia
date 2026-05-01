@@ -1,7 +1,7 @@
 package com.nisum.userapi.service;
 
 import com.nisum.userapi.config.JwtConfigProperties;
-import com.nisum.userapi.infrastructure.adapter.JwtAdapter;
+import com.nisum.userapi.mapper.infrastructure.adapter.JwtAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

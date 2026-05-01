@@ -17,7 +17,11 @@ public class Phone {
     @Id
     private UUID id;
     private String number;
+
+    @Column("city_code")
     private String citycode;
+
+    @Column("contry_code")
     private String contrycode;
 
     @Column("user_id")
