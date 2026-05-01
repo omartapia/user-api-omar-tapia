@@ -5,6 +5,8 @@ import com.nisum.userapi.model.Phone;
 import com.nisum.userapi.model.User;
 import com.nisum.userapi.repository.PhoneRepository;
 import com.nisum.userapi.repository.UserRepository;
+import com.nisum.userapi.service.impl.JwtServiceImpl;
+import com.nisum.userapi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,15 +25,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+class UserServiceImplTest {
     @Mock
     private UserRepository repository;
     @Mock
     private PhoneRepository phoneRepository;
     @Mock
-    private JwtService jwtService;
+    private JwtServiceImpl jwtServiceImpl;
     @InjectMocks
-    private UserService service;
+    private UserServiceImpl service;
 
     @Test
     void givenUserWithoutTokenWhenCreateUserThenSavesUserWithToken() {
@@ -40,7 +42,7 @@ class UserServiceTest {
         user.setPhones(new ArrayList<>());
 
         user.setEmail("omar@example.com");
-        when(jwtService.generate("omar@example.com")).thenReturn("jwt-token");
+        when(jwtServiceImpl.generate("omar@example.com")).thenReturn("jwt-token");
         when(repository.save(user)).thenReturn(Mono.just(user));
         // phoneRepository.save is used by persistPhones; for empty phones list it won't be called
 
@@ -53,7 +55,7 @@ class UserServiceTest {
                     assertThat(saved).isSameAs(user);
                 })
                 .verifyComplete();
-        verify(jwtService).generate("omar@example.com");
+        verify(jwtServiceImpl).generate("omar@example.com");
         verify(repository).save(user);
     }
 

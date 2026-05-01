@@ -4,7 +4,7 @@ import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
 import com.nisum.userapi.mapper.UserMapper;
 import com.nisum.userapi.model.User;
-import com.nisum.userapi.service.UserService;
+import com.nisum.userapi.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
     @Mock
-    private UserService service;
+    private UserServiceImpl service;
 
     @Mock
     private UserMapper mapper;
