@@ -109,6 +109,7 @@ class UserServiceTest {
         // given
         UUID id = UUID.randomUUID();
         when(repository.deleteById(id)).thenReturn(Mono.empty());
+        when(phoneRepository.deleteByUserId(id)).thenReturn(Mono.empty());
         // when
        var result = StepVerifier.create(service.delete(id));
 
@@ -144,7 +145,7 @@ class UserServiceTest {
         // then
         verify(repository).save(existing);
         verify(phoneRepository).deleteByUserId(id);
-        verify(phoneRepository, times(1)).save(any(Phone.class));
+        verify(phoneRepository, times(0)).save(any(Phone.class));
     }
 
     @Test
