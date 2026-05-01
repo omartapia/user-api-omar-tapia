@@ -13,7 +13,7 @@ import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
-public class JwtService {
+public class JwtService implements IJwtService {
     private final JwtConfigProperties jwtConfigProperties;
 
     public String generate(String subject) {

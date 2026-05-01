@@ -1,11 +1,10 @@
 package com.nisum.userapi.service;
 
 import com.nisum.userapi.exception.UserApiException;
-import com.nisum.userapi.model.User;
 import com.nisum.userapi.model.Phone;
-import com.nisum.userapi.repository.UserRepository;
+import com.nisum.userapi.model.User;
 import com.nisum.userapi.repository.PhoneRepository;
-import org.apache.commons.lang3.tuple.Pair;
+import com.nisum.userapi.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,9 +20,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {

@@ -1,34 +1,30 @@
 package com.nisum.userapi.service;
 
-import com.nisum.userapi.dto.UserPatchRequest;
 import com.nisum.userapi.exception.UserApiException;
-import com.nisum.userapi.mapper.UserMapper;
 import com.nisum.userapi.model.Phone;
 import com.nisum.userapi.model.User;
 import com.nisum.userapi.repository.PhoneRepository;
 import com.nisum.userapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements IUserService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
-    private final UserMapper userMapper;
     private final PhoneRepository phoneRepository;
 
+    @Transactional
     public Mono<User> create(User user) {
-        List<Phone> phones = user.getPhones();
         LocalDateTime now = LocalDateTime.now();
         user.setCreated(now);
         user.setModified(now);
@@ -36,29 +32,47 @@ public class UserService {
         user.setActive(true);
         user.setToken(jwtService.generate(user.getEmail()));
 
-        phoneRepository.saveAll(phones.stream()
-                .filter(existPhone -> existPhone.getNumber() != null)
-                .map(phone -> {
-                            phone.setUserId(user.getId());
-                            return phone;
-                            })
-                .collect(Collectors.toList()));
+        return userRepository.save(user)
+                .flatMap(saved ->
+                        persistPhones(saved.getId(), user.getPhones())
+                                .collectList()
+                                .doOnNext(saved::setPhones)
+                                .thenReturn(saved)
 
-        return userRepository.save(user);
+                );
     }
 
     public Flux<User> list() {
-        return userRepository.findAll();
+        return userRepository.findAll()
+                .flatMap(user ->
+                        phoneRepository.findByUserId(user.getId())
+                                .collectList()
+                                .map(phones -> {
+                                    user.setPhones(phones);
+                                    return user;
+                                })
+                );
     }
 
     public Mono<User> get(java.util.UUID uuid) {
-        return userRepository.findById(uuid);
+        return userRepository.findById(uuid)
+                .flatMap(user ->
+                        phoneRepository.findByUserId(user.getId())
+                                .collectList()
+                                .map(phones -> {
+                                    user.setPhones(phones);
+                                    return user;
+                                })
+                );
     }
 
-    public Mono<Void> delete(java.util.UUID uuid) {
-        return userRepository.deleteById(uuid);
+    @Transactional
+    public Mono<Void> delete(UUID id) {
+        return userRepository.deleteById(id)
+                .then(phoneRepository.deleteByUserId(id));
     }
 
+    @Transactional
     public Mono<User> update(UUID id, User user) {
         return userRepository.findById(id)
                 .flatMap(existing -> {
@@ -74,10 +88,9 @@ public class UserService {
 
     }
 
-    public Mono<User> patch(UUID id, UserPatchRequest patch) {
+    public Mono<User> patch(UUID id, User patch) {
         return userRepository.findById(id)
                 .flatMap(existing -> {
-
                     if (patch.getName() != null) {
                         existing.setName(patch.getName());
                     }
@@ -91,7 +104,7 @@ public class UserService {
                     }
 
                     if (patch.getPhones() != null && !patch.getPhones().isEmpty()) {
-                        replacePhones(id,userMapper.toListPhoneEntity(patch.getPhones()));
+                        replacePhones(id, patch.getPhones());
                     }
 
                     existing.setModified(LocalDateTime.now());
@@ -103,18 +116,17 @@ public class UserService {
     }
 
     public Mono<Void> replacePhones(UUID userId, List<Phone> phones) {
-
-        return phoneRepository.deleteAllByUserId(userId)
-                .thenMany(
-                        Flux.fromIterable(phones)
-                                .map(phone -> {
-                                    phone.setId(UUID.randomUUID());
-                                    phone.setUserId(userId);
-                                    return phone;
-                                })
-                                .flatMap(phoneRepository::save)
-                )
+        return phoneRepository.deleteByUserId(userId)
+                .thenMany(persistPhones(userId, phones))
                 .then();
+    }
+
+    public Flux<Phone> persistPhones(UUID userId, List<Phone> phones) {
+        return Flux.fromIterable(phones)
+                .flatMap(phone -> {
+                    phone.setUserId(userId);
+                    return phoneRepository.save(phone);
+                });
     }
 
 }

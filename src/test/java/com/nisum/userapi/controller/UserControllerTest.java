@@ -4,7 +4,6 @@ import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
 import com.nisum.userapi.mapper.UserMapper;
 import com.nisum.userapi.model.User;
-import com.nisum.userapi.service.PhoneService;
 import com.nisum.userapi.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +28,6 @@ import static org.mockito.Mockito.when;
 class UserControllerTest {
     @Mock
     private UserService service;
-
-    @Mock
-    private PhoneService phoneService;
 
     @Mock
     private UserMapper mapper;
@@ -70,7 +66,6 @@ class UserControllerTest {
         UserResponse firstResponse = new UserResponse();
         UserResponse secondResponse = new UserResponse();
         when(service.list()).thenReturn(Flux.just(firstUser, secondUser));
-        when(phoneService.getByUserId(any())).thenReturn(Flux.empty());
         when(mapper.toResponse(firstUser)).thenReturn(firstResponse);
         when(mapper.toResponse(secondUser)).thenReturn(secondResponse);
 
