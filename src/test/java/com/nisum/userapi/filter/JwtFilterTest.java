@@ -1,6 +1,6 @@
 package com.nisum.userapi.filter;
 
-import com.nisum.userapi.service.impl.JwtServiceImpl;
+import com.nisum.userapi.application.port.out.JwtPort;
 import com.nisum.userapi.utils.SecurityConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class JwtFilterTest {
     @Mock
-    private JwtServiceImpl jwtServiceImpl;
+    private JwtPort jwtPort;
     @Mock
     private WebFilterChain chain;
 
@@ -42,7 +42,7 @@ class JwtFilterTest {
         // then
         StepVerifier.create(result).verifyComplete();
         verify(chain).filter(exchange);
-        verifyNoInteractions(jwtServiceImpl);
+        verifyNoInteractions(jwtPort);
     }
 
     @Test
@@ -56,7 +56,7 @@ class JwtFilterTest {
         // then
         StepVerifier.create(result).verifyComplete();
         assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-        verifyNoInteractions(jwtServiceImpl);
+        verifyNoInteractions(jwtPort);
     }
 
     @Test
@@ -74,7 +74,7 @@ class JwtFilterTest {
 
         // then
         StepVerifier.create(result).verifyComplete();
-        verify(jwtServiceImpl).validate(token);
+        verify(jwtPort).validate(token);
         verify(chain).filter(exchange);
     }
 
@@ -86,7 +86,7 @@ class JwtFilterTest {
                         .header(SecurityConstants.AUTHORIZATION_HEADER, SecurityConstants.BEARER_PREFIX + "invalid-token")
         );
         org.mockito.Mockito.doThrow(new IllegalArgumentException("invalid token"))
-                .when(jwtServiceImpl).validate("invalid-token");
+                .when(jwtPort).validate("invalid-token");
         Mono<Void> result = filter.filter(exchange, chain);
         // when
         StepVerifier.create(result)

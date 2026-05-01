@@ -1,7 +1,7 @@
 package com.nisum.userapi.service;
 
 import com.nisum.userapi.config.JwtConfigProperties;
-import com.nisum.userapi.service.impl.JwtServiceImpl;
+import com.nisum.userapi.infrastructure.adapter.JwtAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,9 +13,9 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class JwtServiceImplTest {
+class JwtAdapterTest {
     @InjectMocks
-    private JwtServiceImpl jwtServiceImpl;
+    private JwtAdapter jwtAdapter;
     @Mock
     private JwtConfigProperties jwtConfigProperties;
 
@@ -30,11 +30,11 @@ class JwtServiceImplTest {
         String subject = "omar@example.com";
         when(jwtConfigProperties.getTtl()).thenReturn(3600000);
         // when
-        String token = jwtServiceImpl.generate(subject);
+        String token = jwtAdapter.generate(subject);
 
         // then
         assertThat(token).isNotBlank();
-        assertThatCode(() -> jwtServiceImpl.validate(token)).doesNotThrowAnyException();
+        assertThatCode(() -> jwtAdapter.validate(token)).doesNotThrowAnyException();
     }
 
     @Test
@@ -43,7 +43,7 @@ class JwtServiceImplTest {
         String token = "invalid-token";
 
         // when
-        Throwable thrown = org.assertj.core.api.ThrowableAssert.catchThrowable(() -> jwtServiceImpl.validate(token));
+        Throwable thrown = org.assertj.core.api.ThrowableAssert.catchThrowable(() -> jwtAdapter.validate(token));
 
         // then
         assertThatThrownBy(() -> {
