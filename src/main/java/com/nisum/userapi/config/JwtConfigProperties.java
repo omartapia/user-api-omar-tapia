@@ -10,6 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class JwtConfigProperties {
     @NonNull
     private String secret;
-
-    private int ttl;
+    @NonNull
+    private Integer ttl;
 }

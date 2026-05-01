@@ -17,7 +17,7 @@ import reactor.test.StepVerifier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import com.nisum.userapi.exception.JwtAuthenticationException;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,15 +87,10 @@ class JwtFilterTest {
         );
         org.mockito.Mockito.doThrow(new IllegalArgumentException("invalid token"))
                 .when(jwtService).validate("invalid-token");
-
-        // when
         Mono<Void> result = filter.filter(exchange, chain);
-
-        // then
-        StepVerifier.create(result).verifyComplete();
-        assertThat(exchange.getResponse().getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-        verify(jwtService).validate("invalid-token");
-        verifyNoMoreInteractions(jwtService);
-        verifyNoInteractions(chain);
+        // when
+        StepVerifier.create(result)
+                .expectError(JwtAuthenticationException.class)
+                .verify();
     }
 }

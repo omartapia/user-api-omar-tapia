@@ -9,7 +9,7 @@ import org.springframework.data.relational.core.mapping.Table;
 import java.util.UUID;
 
 
-@Table(name = "phone")
+@Table(name = "phones")
 @Data
 @NoArgsConstructor
 public class Phone {
