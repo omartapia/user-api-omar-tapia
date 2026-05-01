@@ -4,7 +4,7 @@ import com.nisum.userapi.api.UsersApi;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
 import com.nisum.userapi.mapper.UserMapper;
-
+import com.nisum.userapi.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,19 +17,14 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 public class UserController implements UsersApi {
-    private final com.nisum.userapi.application.usecase.CreateUserUseCase createUserUseCase;
-    private final com.nisum.userapi.application.usecase.ListUsersUseCase listUsersUseCase;
-    private final com.nisum.userapi.application.usecase.GetUserUseCase getUserUseCase;
-    private final com.nisum.userapi.application.usecase.DeleteUserUseCase deleteUserUseCase;
-    private final com.nisum.userapi.application.usecase.UpdateUserUseCase updateUserUseCase;
-    private final com.nisum.userapi.application.usecase.PatchUserUseCase patchUserUseCase;
+    private final UserService userService;
     private final UserMapper mapper;
 
     @Override
     public Mono<ResponseEntity<UserResponse>> createUser(Mono<UserRequest> userRequest, ServerWebExchange exchange) {
         return userRequest
                 .map(mapper::toEntity)
-                .flatMap(createUserUseCase::create)
+                .flatMap(userService::create)
                 .map(mapper::toResponse)
                 .map(ResponseEntity::ok);
     }
@@ -37,7 +32,7 @@ public class UserController implements UsersApi {
     @Override
     public Mono<ResponseEntity<Flux<UserResponse>>> listUsers(ServerWebExchange exchange) {
         return Mono.just(
-                ResponseEntity.ok(listUsersUseCase.list().map(mapper::toResponse))
+                ResponseEntity.ok(userService.list().map(mapper::toResponse))
         );
     }
 
@@ -45,7 +40,7 @@ public class UserController implements UsersApi {
     public Mono<ResponseEntity<UserResponse>> patchUser(UUID id, Mono<UserRequest> userRequest, ServerWebExchange exchange) {
         return userRequest
                 .map(mapper::toEntity)
-                .flatMap(patch -> patchUserUseCase.patch(id, patch))
+                .flatMap(patch -> userService.patch(id, patch))
                 .map(mapper::toResponse)
                 .map(ResponseEntity::ok);
     }
@@ -53,8 +48,8 @@ public class UserController implements UsersApi {
     @Override
     public Mono<ResponseEntity<UserResponse>> updateUser(UUID id, Mono<UserRequest> userRequest, ServerWebExchange exchange) {
         return userRequest
-                .map(mapper::toEntity)
-                .flatMap(user -> updateUserUseCase.update(id, user))
+                .map(mapper::toEntity).
+                flatMap(user -> userService.update(id, user))
                 .map(mapper::toResponse)
                 .map(ResponseEntity::ok);
     }
@@ -62,12 +57,12 @@ public class UserController implements UsersApi {
 
     @Override
     public Mono<ResponseEntity<Void>> deleteUser(UUID id, ServerWebExchange exchange) {
-        return deleteUserUseCase.delete(id).thenReturn(ResponseEntity.ok().build());
+        return userService.delete(id).thenReturn(ResponseEntity.ok().build());
     }
 
     @Override
     public Mono<ResponseEntity<UserResponse>> getUserById(UUID id, ServerWebExchange exchange) {
-        return getUserUseCase.get(id)
+        return userService.get(id)
                 .map(mapper::toResponse)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
