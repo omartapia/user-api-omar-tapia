@@ -1,6 +1,6 @@
 package com.nisum.userapi.filter;
 
-import com.nisum.userapi.service.impl.JwtServiceImpl;
+import com.nisum.userapi.application.port.out.JwtPort;
 import static  com.nisum.userapi.utils.SecurityConstants.BEARER_PREFIX;
 import static  com.nisum.userapi.utils.SecurityConstants.AUTHORIZATION_HEADER;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.Set;
 @Slf4j
 public class JwtFilter implements WebFilter {
 
-    private final JwtServiceImpl jwtServiceImpl;
+    private final JwtPort jwtPort;
 
     private static final Map<HttpMethod, Set<String>> PUBLIC_ENDPOINTS =
             Map.of(
@@ -57,7 +57,7 @@ public class JwtFilter implements WebFilter {
         }
 
         try {
-            jwtServiceImpl.validate(
+            jwtPort.validate(
                     authorization.substring(BEARER_PREFIX.length())
             );
         } catch (Exception e) {

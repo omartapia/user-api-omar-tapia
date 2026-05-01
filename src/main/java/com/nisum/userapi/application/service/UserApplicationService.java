@@ -11,7 +11,7 @@ import com.nisum.userapi.application.usecase.PatchUserUseCase;
 import com.nisum.userapi.exception.UserApiException;
 import com.nisum.userapi.model.Phone;
 import com.nisum.userapi.model.User;
-import com.nisum.userapi.service.JwtService;
+import com.nisum.userapi.application.port.out.JwtPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ import java.util.UUID;
 public class UserApplicationService implements CreateUserUseCase, ListUsersUseCase, GetUserUseCase, DeleteUserUseCase, UpdateUserUseCase, PatchUserUseCase {
     private final UserPersistencePort userPersistencePort;
     private final PhonePersistencePort phonePersistencePort;
-    private final JwtService jwtService;
+    private final JwtPort jwtPort;
 
     @Transactional
     public Mono<User> create(User user) {
@@ -37,7 +37,7 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
         user.setModified(now);
         user.setLastLogin(now);
         user.setActive(true);
-        user.setToken(jwtService.generate(user.getEmail()));
+        user.setToken(jwtPort.generate(user.getEmail()));
 
         return userPersistencePort.save(user)
                 .flatMap(saved ->

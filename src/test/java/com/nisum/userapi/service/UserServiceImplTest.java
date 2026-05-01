@@ -6,7 +6,7 @@ import com.nisum.userapi.application.service.UserApplicationService;
 import com.nisum.userapi.exception.UserApiException;
 import com.nisum.userapi.model.Phone;
 import com.nisum.userapi.model.User;
-import com.nisum.userapi.service.JwtService;
+import com.nisum.userapi.application.port.out.JwtPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +31,7 @@ class UserApplicationServiceTest {
     @Mock
     private PhonePersistencePort phoneRepository;
     @Mock
-    private JwtService jwtService;
+    private JwtPort jwtService;
     @InjectMocks
     private UserApplicationService service;
 
