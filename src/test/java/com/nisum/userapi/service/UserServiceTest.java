@@ -135,7 +135,6 @@ class UserServiceTest {
 
         when(repository.save(existing)).thenReturn(Mono.just(existing));
         when(phoneRepository.deleteByUserId(id)).thenReturn(Mono.empty());
-        when(phoneRepository.save(any(Phone.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
         // when
         StepVerifier.create(service.update(id, update))
