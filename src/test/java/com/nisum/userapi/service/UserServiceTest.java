@@ -1,16 +1,21 @@
 package com.nisum.userapi.service;
 
 import com.nisum.userapi.model.User;
+import com.nisum.userapi.model.Phone;
 import com.nisum.userapi.repository.UserRepository;
+import com.nisum.userapi.repository.PhoneRepository;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.util.TestPropertyValues;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +30,8 @@ class UserServiceTest {
     @Mock
     private UserRepository repository;
     @Mock
+    private PhoneRepository phoneRepository;
+    @Mock
     private JwtService jwtService;
     @InjectMocks
     private UserService service;
@@ -33,9 +40,12 @@ class UserServiceTest {
     void givenUserWithoutTokenWhenCreateUserThenSavesUserWithToken() {
         // given
         User user = new User();
+        user.setPhones(new ArrayList<>());
+
         user.setEmail("omar@example.com");
         when(jwtService.generate("omar@example.com")).thenReturn("jwt-token");
         when(repository.save(user)).thenReturn(Mono.just(user));
+        when(phoneRepository.saveAll(any(Iterable.class))).thenReturn(Flux.fromIterable(user.getPhones()));
 
         // when
         StepVerifier.FirstStep<User> result = StepVerifier.create(service.create(user));

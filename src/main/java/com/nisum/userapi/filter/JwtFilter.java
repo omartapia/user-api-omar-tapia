@@ -1,4 +1,4 @@
-package com.nisum.userapi.security;
+package com.nisum.userapi.filter;
 
 import com.nisum.userapi.service.JwtService;
 import com.nisum.userapi.utils.SecurityConstants;

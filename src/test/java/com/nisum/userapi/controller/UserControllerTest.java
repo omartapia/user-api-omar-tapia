@@ -4,6 +4,7 @@ import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
 import com.nisum.userapi.mapper.UserMapper;
 import com.nisum.userapi.model.User;
+import com.nisum.userapi.service.PhoneService;
 import com.nisum.userapi.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +17,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +29,10 @@ import static org.mockito.Mockito.when;
 class UserControllerTest {
     @Mock
     private UserService service;
+
+    @Mock
+    private PhoneService phoneService;
+
     @Mock
     private UserMapper mapper;
     @InjectMocks
@@ -35,6 +42,7 @@ class UserControllerTest {
     void givenValidUserRequestWhenCreateUserThenReturnsUserResponse() {
         // given
         UserRequest request = new UserRequest();
+        request.setPhones(new ArrayList<>());
         User entity = new User();
         User saved = new User();
         UserResponse response = new UserResponse();
@@ -62,6 +70,7 @@ class UserControllerTest {
         UserResponse firstResponse = new UserResponse();
         UserResponse secondResponse = new UserResponse();
         when(service.list()).thenReturn(Flux.just(firstUser, secondUser));
+        when(phoneService.getByUserId(any())).thenReturn(Flux.empty());
         when(mapper.toResponse(firstUser)).thenReturn(firstResponse);
         when(mapper.toResponse(secondUser)).thenReturn(secondResponse);
 

@@ -8,6 +8,7 @@ import com.nisum.userapi.model.User;
 import com.nisum.userapi.repository.PhoneRepository;
 import com.nisum.userapi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,12 +28,21 @@ public class UserService {
     private final PhoneRepository phoneRepository;
 
     public Mono<User> create(User user) {
-        user.setToken(jwtService.generate(user.getEmail()));
+        List<Phone> phones = user.getPhones();
         LocalDateTime now = LocalDateTime.now();
         user.setCreated(now);
         user.setModified(now);
         user.setLastLogin(now);
         user.setActive(true);
+        user.setToken(jwtService.generate(user.getEmail()));
+
+        phoneRepository.saveAll(phones.stream()
+                .filter(existPhone -> existPhone.getNumber() != null)
+                .map(phone -> {
+                            phone.setUserId(user.getId());
+                            return phone;
+                            })
+                .collect(Collectors.toList()));
 
         return userRepository.save(user);
     }
@@ -55,6 +66,7 @@ public class UserService {
                     existing.setEmail(user.getEmail());
                     existing.setPassword(user.getPassword());
                     existing.setModified(LocalDateTime.now());
+                    replacePhones(id, user.getPhones());
                     return userRepository.save(existing);
                 }).switchIfEmpty(
                         Mono.error(new UserApiException("No se ha podido actualizar el ususario porque no existe", HttpStatus.NOT_FOUND))

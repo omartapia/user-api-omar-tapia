@@ -11,6 +11,6 @@ public interface PhoneRepository
         extends ReactiveCrudRepository<Phone, UUID> {
 
     Flux<Phone> findAllByUserId(UUID userId);
-
     Flux<Phone> deleteAllByUserId(UUID userId);
+    Flux<Phone> getByUserId(UUID userId);
 }

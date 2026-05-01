@@ -1,17 +1,17 @@
 package com.nisum.userapi.model;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Table(name = "users")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class User {
     @Id
@@ -24,5 +24,7 @@ public class User {
     private LocalDateTime lastLogin;
     private String token;
     private boolean active;
+    @Transient
+    private List<Phone> phones;
 
 }

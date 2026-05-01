@@ -1,6 +1,6 @@
 package com.nisum.userapi.config;
 
-import com.nisum.userapi.security.JwtFilter;
+import com.nisum.userapi.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
