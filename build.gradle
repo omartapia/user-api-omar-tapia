@@ -1,0 +1,110 @@
+plugins {
+ id 'org.springframework.boot' version '3.2.5'
+ id 'io.spring.dependency-management' version '1.1.4'
+ id 'org.openapi.generator' version '7.21.0'
+ id 'java'
+ id 'jacoco'
+}
+group = 'com.nisum'
+version = '1.0.0'
+
+java { sourceCompatibility = '17' }
+repositories { mavenCentral() }
+
+ext {
+ author = 'Omar Tapia'
+ lombokVersion = '1.18.44'
+ mapstructVersion = '1.5.5.Final'
+ mockitoVersion = '5.23.0'
+}
+
+dependencies {
+ implementation 'org.springframework.boot:spring-boot-starter-webflux'
+ implementation 'org.springframework.boot:spring-boot-starter-security'
+ implementation "org.springframework.boot:spring-boot-starter-data-r2dbc"
+ implementation "io.r2dbc:r2dbc-h2"
+ implementation "org.flywaydb:flyway-core"
+ runtimeOnly "com.h2database:h2"
+ implementation 'org.springframework.boot:spring-boot-starter-validation'
+ implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0'
+ implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+ implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+ implementation 'org.apache.commons:commons-lang3:3.18.0'
+ compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+ compileOnly "org.projectlombok:lombok:${lombokVersion}"
+ annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+ annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+ annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+ runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+ runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+ runtimeOnly 'com.h2database:h2'
+ testImplementation 'org.springframework.boot:spring-boot-starter-test'
+ testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+ testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+ testImplementation 'io.projectreactor:reactor-test'
+ testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+ testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+    // Resilience4j for retries and circuit breakers
+    implementation 'io.github.resilience4j:resilience4j-reactor:1.7.1'
+    implementation 'io.github.resilience4j:resilience4j-retry:1.7.1'
+    implementation 'io.github.resilience4j:resilience4j-circuitbreaker:1.7.1'
+}
+
+openApiGenerate {
+ generatorName = 'spring'
+ inputSpec = "$projectDir/src/main/resources/openapi.yaml"
+ outputDir = "$buildDir/generated/openapi"
+ apiPackage = 'com.nisum.userapi.api'
+ modelPackage = 'com.nisum.userapi.dto'
+ invokerPackage = 'com.nisum.userapi.openapi'
+ globalProperties = [
+  apis: '',
+  models: ''
+ ]
+ configOptions = [
+  interfaceOnly: 'true',
+  reactive: 'true',
+  useSpringBoot3: 'true',
+  useTags: 'true',
+  useBeanValidation: 'true',
+  performBeanValidation: 'true',
+  openApiNullable: 'false',
+  skipDefaultInterface: 'true',
+  requestMappingMode: 'api_interface',
+  sourceFolder: 'src/main/java'
+ ]
+}
+
+sourceSets {
+ main {
+  java {
+   srcDir "$buildDir/generated/openapi/src/main/java"
+  }
+ }
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+jacoco {
+ toolVersion = '0.8.14'
+}
+
+test {
+ useJUnitPlatform()
+ finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+ dependsOn test
+ classDirectories.setFrom(files(classDirectories.files.collect {
+  fileTree(dir: it, exclude: [
+   'com/nisum/userapi/api/**',
+   'com/nisum/userapi/dto/**'
+  ])
+ }))
+ reports {
+  xml.required = true
+  html.required = true
+ }
+}
