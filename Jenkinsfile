@@ -1,9 +1,14 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = "omartapia/user-api-omar-tapia:${GIT_BRANCH}"
-    }
+  stage('Set Image') {
+      steps {
+          script {
+              def branch = env.GIT_BRANCH.replace("origin/", "")
+              env.DOCKER_IMAGE = "omartapia/user-api-omar-tapia:${branch}"
+          }
+      }
+  }
 
     stages {
         stage('Checkout') {
