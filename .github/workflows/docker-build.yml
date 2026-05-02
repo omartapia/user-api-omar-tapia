@@ -6,6 +6,9 @@ on:
       - master
       - develop
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-jar:
     runs-on: ubuntu-latest
@@ -60,5 +63,5 @@ jobs:
       - name: Etiquetar como latest si es master
         if: github.ref_name == 'master'
         run: |
-          docker tag omartapia/user-api-omar-tapia:master miusuario/mi-app:latest
+          docker tag omartapia/user-api-omar-tapia:master omartapia/user-api-omar-tapia:latest
           docker push omartapia/user-api-omar-tapia:latest

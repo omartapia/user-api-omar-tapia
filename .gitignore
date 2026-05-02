@@ -119,8 +119,6 @@ swagger-ui/
 *.tmp
 *.bak
 .codex
-/out
-/build
 /.idea
 vtcode.toml
 
