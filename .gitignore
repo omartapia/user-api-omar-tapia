@@ -121,4 +121,7 @@ swagger-ui/
 .codex
 /.idea
 vtcode.toml
+
+
+# ====================exclusions ====================
 !gradle/wrapper/gradle-wrapper.jar
