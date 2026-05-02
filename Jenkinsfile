@@ -5,7 +5,7 @@ pipeline {
         stage('Set Image') {
               steps {
                   script {
-                      def branch = env.GIT_BRANCH.replace("origin/", "")
+                      def branch = env.GIT_BRANCH.replace("origin/", "") 
                       env.DOCKER_IMAGE = "omartapia/user-api-omar-tapia:${branch}"
                   }
               }
