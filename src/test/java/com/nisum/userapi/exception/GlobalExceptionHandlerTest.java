@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ServerWebInputException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,6 +41,16 @@ class GlobalExceptionHandlerTest {
         assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(resp.getBody()).isNotNull();
         assertThat(resp.getBody().getMensaje()).isEqualTo("El correo ya está registrado");
+    }
+
+    @Test
+    void handleBadRequestReturnsBadRequestAndMessage() {
+        ServerWebInputException ex = new ServerWebInputException("bad request");
+        ResponseEntity<ErrorResponse> resp = handler.handleBadRequest(ex);
+
+        assertThat(resp.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(resp.getBody()).isNotNull();
+        assertThat(resp.getBody().getMensaje()).isEqualTo("Solicitud inválida");
     }
 
     @Test

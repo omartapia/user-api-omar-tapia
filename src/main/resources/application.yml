@@ -19,3 +19,6 @@ nisum:
   jwt:
     secret: bebf8157-2c41-43a5-9fc3-b2d7bb6dac7f
     ttl: 3600000 # una hora en segundos
+  validation:
+    email-regex: "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+    password-regex: "^(?=.*[A-Za-z])(?=.*\\d).{6,}$"

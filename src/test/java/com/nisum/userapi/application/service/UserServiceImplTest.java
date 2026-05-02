@@ -2,12 +2,14 @@ package com.nisum.userapi.application.service;
 
 import com.nisum.userapi.application.port.out.PhonePersistencePort;
 import com.nisum.userapi.application.port.out.UserPersistencePort;
+import com.nisum.userapi.config.UserValidationProperties;
 import com.nisum.userapi.exception.UserApiException;
 import com.nisum.userapi.domain.Phone;
 import com.nisum.userapi.domain.User;
 import com.nisum.userapi.application.port.in.JwtPort;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.retry.Retry;
+import org.springframework.dao.DuplicateKeyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,6 +40,7 @@ class UserApplicationServiceTest {
     private Retry userRetry;
     private CircuitBreaker phoneCircuit;
     private Retry phoneRetry;
+    private UserValidator userValidator;
 
     private UserApplicationPort service;
 
@@ -47,13 +50,8 @@ class UserApplicationServiceTest {
         userRetry = Retry.ofDefaults("testUserRetry");
         phoneCircuit = CircuitBreaker.ofDefaults("testPhoneCircuit");
         phoneRetry = Retry.ofDefaults("testPhoneRetry");
-        service = new UserApplicationPort(repository, phoneRepository, jwtService, userCircuit, userRetry, phoneCircuit, phoneRetry);
-
-        // Provide sensible default behavior for phone persistence mocks so tests that don't stub
-        // these methods won't receive null (which leads to NPE when the service applies operators).
-        when(phoneRepository.save(any(Phone.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-        when(phoneRepository.deleteByUserId(any())).thenReturn(Mono.empty());
-        when(phoneRepository.findByUserId(any())).thenReturn(Flux.empty());
+        userValidator = new UserValidator(new UserValidationProperties());
+        service = new UserApplicationPort(repository, phoneRepository, jwtService, userValidator, userCircuit, userRetry, phoneCircuit, phoneRetry);
     }
 
     @Test
@@ -63,6 +61,7 @@ class UserApplicationServiceTest {
         user.setPhones(new ArrayList<>());
 
         user.setEmail("omar@example.com");
+        user.setPassword("hunter2");
         when(jwtService.generate("omar@example.com")).thenReturn("jwt-token");
         when(repository.save(user)).thenReturn(Mono.just(user));
         // phoneRepository.save is used by persistPhones; for empty phones list it won't be called
@@ -153,12 +152,15 @@ class UserApplicationServiceTest {
 
         User update = new User();
         update.setName("new");
+        update.setEmail("new@example.com");
+        update.setPassword("hunter2");
         Phone p = new Phone();
         p.setNumber("123");
         update.setPhones(List.of(p));
 
         when(repository.save(existing)).thenReturn(Mono.just(existing));
         when(phoneRepository.deleteByUserId(id)).thenReturn(Mono.empty());
+        when(phoneRepository.save(any(Phone.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
         // when
         StepVerifier.create(service.update(id, update))
@@ -178,6 +180,8 @@ class UserApplicationServiceTest {
         when(repository.findById(id)).thenReturn(Mono.empty());
 
         User update = new User();
+        update.setEmail("new@example.com");
+        update.setPassword("hunter2");
 
         // when / then
         StepVerifier.create(service.update(id, update))
@@ -199,6 +203,7 @@ class UserApplicationServiceTest {
         patch.setEmail("new@example.com");
 
         when(repository.save(existing)).thenReturn(Mono.just(existing));
+        when(phoneRepository.deleteByUserId(id)).thenReturn(Mono.empty());
 
         // when
         StepVerifier.create(service.patch(id, patch))
@@ -206,6 +211,49 @@ class UserApplicationServiceTest {
                 .verifyComplete();
 
         verify(repository).save(existing);
+    }
+
+    @Test
+    void givenInvalidEmailWhenCreateThenReturnsBadRequest() {
+        User user = new User();
+        user.setEmail("invalid-email");
+        user.setPassword("hunter2");
+
+        StepVerifier.create(service.create(user))
+                .expectErrorMatches(error -> error instanceof UserApiException
+                        && "Formato de correo inválido".equals(error.getMessage()))
+                .verify();
+
+        verifyNoInteractions(jwtService, repository);
+    }
+
+    @Test
+    void givenInvalidPasswordWhenCreateThenReturnsBadRequest() {
+        User user = new User();
+        user.setEmail("omar@example.com");
+        user.setPassword("short");
+
+        StepVerifier.create(service.create(user))
+                .expectErrorMatches(error -> error instanceof UserApiException
+                        && "Formato de contraseña inválido".equals(error.getMessage()))
+                .verify();
+
+        verifyNoInteractions(jwtService, repository);
+    }
+
+    @Test
+    void givenDuplicateEmailWhenCreateThenPreservesDuplicateKeyException() {
+        User user = new User();
+        user.setEmail("omar@example.com");
+        user.setPassword("hunter2");
+        user.setPhones(new ArrayList<>());
+
+        when(jwtService.generate("omar@example.com")).thenReturn("jwt-token");
+        when(repository.save(user)).thenReturn(Mono.error(new DuplicateKeyException("duplicate")));
+
+        StepVerifier.create(service.create(user))
+                .expectError(DuplicateKeyException.class)
+                .verify();
     }
 
     @Test

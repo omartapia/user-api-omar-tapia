@@ -3,6 +3,7 @@ package com.nisum.userapi.infrastructure.input.adapter.rest;
 import com.nisum.userapi.application.port.in.UserApplicationPort;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
+import com.nisum.userapi.exception.UserApiException;
 import com.nisum.userapi.mapper.UserMapper;
 import com.nisum.userapi.domain.User;
 import org.junit.jupiter.api.Assertions;
@@ -56,7 +57,7 @@ class UserControllerAdapterTest {
         // then
         StepVerifier.create(result)
                 .assertNext(entityResponse -> {
-                    assertThat(entityResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+                    assertThat(entityResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
                     assertThat(entityResponse.getBody()).isSameAs(response);
                 })
                 .verifyComplete();
@@ -120,12 +121,12 @@ class UserControllerAdapterTest {
 
         // then
         StepVerifier.create(result)
-                .assertNext(entityResponse -> assertThat(entityResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND))
-                .verifyComplete();
+                .expectError(UserApiException.class)
+                .verify();
     }
 
     @Test
-    void givenExistingUserIdWhenDeleteUserThenReturnsOk() {
+    void givenExistingUserIdWhenDeleteUserThenReturnsNoContent() {
         // given
         UUID id = UUID.randomUUID();
         when(service.delete(id)).thenReturn(Mono.empty());
@@ -135,7 +136,7 @@ class UserControllerAdapterTest {
 
         // then
         StepVerifier.create(result)
-                .assertNext(entityResponse -> assertThat(entityResponse.getStatusCode()).isEqualTo(HttpStatus.OK))
+                .assertNext(entityResponse -> assertThat(entityResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT))
                 .verifyComplete();
         verify(service).delete(id);
     }

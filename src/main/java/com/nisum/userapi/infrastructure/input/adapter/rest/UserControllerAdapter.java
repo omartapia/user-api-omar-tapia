@@ -4,8 +4,10 @@ import com.nisum.userapi.api.UsersApi;
 import com.nisum.userapi.application.port.in.*;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
+import com.nisum.userapi.exception.UserApiException;
 import com.nisum.userapi.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
@@ -26,7 +28,7 @@ public class UserControllerAdapter implements UsersApi {
                 .map(mapper::toEntity)
                 .flatMap(userApplicationService::create)
                 .map(mapper::toResponse)
-                .map(ResponseEntity::ok);
+                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response));
     }
 
     @Override
@@ -57,7 +59,7 @@ public class UserControllerAdapter implements UsersApi {
 
     @Override
     public Mono<ResponseEntity<Void>> deleteUser(UUID id, ServerWebExchange exchange) {
-        return userApplicationService.delete(id).thenReturn(ResponseEntity.ok().build());
+        return userApplicationService.delete(id).thenReturn(ResponseEntity.noContent().build());
     }
 
     @Override
@@ -65,6 +67,6 @@ public class UserControllerAdapter implements UsersApi {
         return userApplicationService.get(id)
                 .map(mapper::toResponse)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .switchIfEmpty(Mono.error(new UserApiException("Usuario no encontrado", HttpStatus.NOT_FOUND)));
     }
 }

@@ -8,6 +8,7 @@ import com.nisum.userapi.domain.Phone;
 import com.nisum.userapi.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ public class UserApplicationPort implements com.nisum.userapi.application.port.i
     private final UserPersistencePort userPersistencePort;
     private final PhonePersistencePort phonePersistencePort;
     private final JwtPort jwtPort;
+    private final UserValidator userValidator;
 
 
     private final CircuitBreaker userCircuit;
@@ -40,6 +42,7 @@ public class UserApplicationPort implements com.nisum.userapi.application.port.i
     public UserApplicationPort(UserPersistencePort userPersistencePort,
                                PhonePersistencePort phonePersistencePort,
                                JwtPort jwtPort,
+                               UserValidator userValidator,
                                @Qualifier("userCircuitBreaker") CircuitBreaker userCircuit,
                                @Qualifier("userRetry") Retry userRetry,
                                @Qualifier("phoneCircuitBreaker") CircuitBreaker phoneCircuit,
@@ -47,6 +50,7 @@ public class UserApplicationPort implements com.nisum.userapi.application.port.i
         this.userPersistencePort = userPersistencePort;
         this.phonePersistencePort = phonePersistencePort;
         this.jwtPort = jwtPort;
+        this.userValidator = userValidator;
         this.userCircuit = userCircuit;
         this.userRetry = userRetry;
         this.phoneCircuit = phoneCircuit;
@@ -55,24 +59,28 @@ public class UserApplicationPort implements com.nisum.userapi.application.port.i
 
     @Transactional
     public Mono<User> create(User user) {
-        LocalDateTime now = LocalDateTime.now();
-        user.setCreated(now);
-        user.setModified(now);
-        user.setLastLogin(now);
-        user.setActive(true);
-        user.setToken(jwtPort.generate(user.getEmail()));
+        return Mono.defer(() -> {
+            userValidator.validateForCreate(user);
 
-        return userPersistencePort.save(user)
-                .transformDeferred(RetryOperator.of(userRetry))
-                .transformDeferred(CircuitBreakerOperator.of(userCircuit))
-                .flatMap(saved ->
-                        persistPhones(saved.getId(), user.getPhones())
-                                .collectList()
-                                .doOnNext(saved::setPhones)
-                                .thenReturn(saved)
+            LocalDateTime now = LocalDateTime.now();
+            user.setCreated(now);
+            user.setModified(now);
+            user.setLastLogin(now);
+            user.setActive(true);
+            user.setToken(jwtPort.generate(user.getEmail()));
 
-                )
-                .onErrorMap(err -> new UserApiException("Error saving user", HttpStatus.SERVICE_UNAVAILABLE));
+            return userPersistencePort.save(user)
+                    .transformDeferred(RetryOperator.of(userRetry))
+                    .transformDeferred(CircuitBreakerOperator.of(userCircuit))
+                    .flatMap(saved ->
+                            persistPhones(saved.getId(), user.getPhones())
+                                    .collectList()
+                                    .doOnNext(saved::setPhones)
+                                    .thenReturn(saved)
+
+                    )
+                    .onErrorMap(this::mapCreateError);
+        });
     }
 
     @Override
@@ -107,6 +115,7 @@ public class UserApplicationPort implements com.nisum.userapi.application.port.i
     @Transactional
     public Mono<Void> delete(UUID id) {
         return userPersistencePort.findById(id)
+                .switchIfEmpty(Mono.error(new UserApiException("Usuario no encontrado", HttpStatus.NOT_FOUND)))
                 .flatMap(user -> {
                     user.setActive(false);
                     user.setModified(LocalDateTime.now());
@@ -117,45 +126,53 @@ public class UserApplicationPort implements com.nisum.userapi.application.port.i
 
     @Transactional
     public Mono<User> update(UUID id, User user) {
-        return userPersistencePort.findById(id)
-                .flatMap(existing -> {
-                    existing.setName(user.getName());
-                    existing.setEmail(user.getEmail());
-                    existing.setPassword(user.getPassword());
-                    existing.setModified(LocalDateTime.now());
-                    existing.setActive(true);
-                    return replacePhones(id, user.getPhones())
-                            .then(userPersistencePort.save(existing));
-                }).switchIfEmpty(
-                        Mono.error(new UserApiException("No se ha podido actualizar el ususario porque no existe", HttpStatus.NOT_FOUND))
-                );
+        return Mono.defer(() -> {
+            userValidator.validateForUpdate(user);
+
+            return userPersistencePort.findById(id)
+                    .flatMap(existing -> {
+                        existing.setName(user.getName());
+                        existing.setEmail(user.getEmail());
+                        existing.setPassword(user.getPassword());
+                        existing.setModified(LocalDateTime.now());
+                        existing.setActive(true);
+                        return replacePhones(id, user.getPhones())
+                                .then(userPersistencePort.save(existing));
+                    }).switchIfEmpty(
+                            Mono.error(new UserApiException("No se ha podido actualizar el ususario porque no existe", HttpStatus.NOT_FOUND))
+                    );
+        });
 
     }
 
     public Mono<User> patch(UUID id, User patch) {
-        return userPersistencePort.findById(id)
-                .flatMap(existing -> {
-                    if (patch.getName() != null) {
-                        existing.setName(patch.getName());
-                    }
+        return Mono.defer(() -> {
+            userValidator.validateForPatch(patch);
 
-                    if (patch.getEmail() != null) {
-                        existing.setEmail(patch.getEmail());
-                    }
+            return userPersistencePort.findById(id)
+                    .flatMap(existing -> {
+                        if (patch.getName() != null) {
+                            existing.setName(patch.getName());
+                        }
 
-                    if (patch.getPassword() != null) {
-                        existing.setPassword(patch.getPassword());
-                    }
+                        if (patch.getEmail() != null) {
+                            existing.setEmail(patch.getEmail());
+                        }
 
-                    existing.setModified(LocalDateTime.now());
-                    existing.setActive(true);
+                        if (patch.getPassword() != null) {
+                            existing.setPassword(patch.getPassword());
+                        }
 
-                    return replacePhones(id, patch.getPhones())
-                            .then(userPersistencePort.save(existing));
-                })
-                .switchIfEmpty(
-                        Mono.error(new UserApiException("No se ha podido actualizar parcialmente el ususario porque no existe", HttpStatus.NOT_FOUND))
-                );
+                        existing.setModified(LocalDateTime.now());
+                        existing.setActive(true);
+
+                        return replacePhones(id, patch.getPhones())
+                                .then(userPersistencePort.save(existing));
+                    })
+                    .switchIfEmpty(
+                            Mono.error(new UserApiException("No se ha podido actualizar parcialmente el ususario porque no existe", HttpStatus.NOT_FOUND))
+                    );
+        });
     }
 
     public Mono<Void> replacePhones(UUID userId, List<Phone> phones) {
@@ -179,4 +196,11 @@ public class UserApplicationPort implements com.nisum.userapi.application.port.i
                 });
     }
 
+    private Throwable mapCreateError(Throwable err) {
+        if (err instanceof UserApiException || err instanceof DuplicateKeyException) {
+            return err;
+        }
+
+        return new UserApiException("Error saving user", HttpStatus.SERVICE_UNAVAILABLE);
+    }
 }
