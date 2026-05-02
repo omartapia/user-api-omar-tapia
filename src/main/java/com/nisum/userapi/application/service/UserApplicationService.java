@@ -19,6 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.reactor.retry.RetryOperator;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +35,13 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
     private final PhonePersistencePort phonePersistencePort;
     private final JwtPort jwtPort;
 
+    // resilience components (simple defaults); consider moving to config
+    private static final CircuitBreaker userCircuit = CircuitBreaker.ofDefaults("userServiceCircuit");
+    private static final Retry userRetry = Retry.ofDefaults("userServiceRetry");
+
+    private static final CircuitBreaker phoneCircuit = CircuitBreaker.ofDefaults("phoneServiceCircuit");
+    private static final Retry phoneRetry = Retry.ofDefaults("phoneServiceRetry");
+
     @Transactional
     public Mono<User> create(User user) {
         LocalDateTime now = LocalDateTime.now();
@@ -40,13 +52,16 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
         user.setToken(jwtPort.generate(user.getEmail()));
 
         return userPersistencePort.save(user)
+                .transformDeferred(RetryOperator.of(userRetry))
+                .transformDeferred(CircuitBreakerOperator.of(userCircuit))
                 .flatMap(saved ->
                         persistPhones(saved.getId(), user.getPhones())
                                 .collectList()
                                 .doOnNext(saved::setPhones)
                                 .thenReturn(saved)
 
-                );
+                )
+                .onErrorMap(err -> new UserApiException("Error saving user", HttpStatus.SERVICE_UNAVAILABLE));
     }
 
     @Override
@@ -144,7 +159,10 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
         return Flux.fromIterable(phones)
                 .flatMap(phone -> {
                     phone.setUserId(userId);
-                    return phonePersistencePort.save(phone);
+                    return phonePersistencePort.save(phone)
+                            .transformDeferred(RetryOperator.of(phoneRetry))
+                            .transformDeferred(CircuitBreakerOperator.of(phoneCircuit))
+                            .onErrorMap(err -> new UserApiException("Error persisting phone", HttpStatus.SERVICE_UNAVAILABLE));
                 });
     }
 }
