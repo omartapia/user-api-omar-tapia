@@ -1,6 +1,6 @@
-package com.nisum.userapi.infrastructure.adapter;
+package com.nisum.userapi.infrastructure.input.adapter;
 
-import com.nisum.userapi.application.port.out.JwtPort;
+import com.nisum.userapi.application.port.in.JwtPort;
 import com.nisum.userapi.config.JwtConfigProperties;
 import com.nisum.userapi.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;

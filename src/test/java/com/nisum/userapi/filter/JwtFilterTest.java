@@ -1,6 +1,6 @@
 package com.nisum.userapi.filter;
 
-import com.nisum.userapi.application.port.out.JwtPort;
+import com.nisum.userapi.application.port.in.JwtPort;
 import com.nisum.userapi.utils.SecurityConstants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

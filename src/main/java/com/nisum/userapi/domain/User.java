@@ -1,4 +1,4 @@
-package com.nisum.userapi.model;
+package com.nisum.userapi.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

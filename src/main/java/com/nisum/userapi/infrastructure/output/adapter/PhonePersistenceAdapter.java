@@ -1,8 +1,8 @@
-package com.nisum.userapi.infrastructure.adapter;
+package com.nisum.userapi.infrastructure.output.adapter;
 
 import com.nisum.userapi.application.port.out.PhonePersistencePort;
-import com.nisum.userapi.model.Phone;
-import com.nisum.userapi.infrastructure.repository.PhoneRepository;
+import com.nisum.userapi.domain.Phone;
+import com.nisum.userapi.infrastructure.output.adapter.repository.PhoneRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;

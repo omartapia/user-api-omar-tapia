@@ -1,7 +1,7 @@
 package com.nisum.userapi.mapper;
 
 import com.nisum.userapi.dto.PhoneRequest;
-import com.nisum.userapi.model.Phone;
+import com.nisum.userapi.domain.Phone;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 

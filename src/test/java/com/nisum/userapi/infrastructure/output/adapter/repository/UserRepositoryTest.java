@@ -1,7 +1,7 @@
-package com.nisum.userapi.repository;
+package com.nisum.userapi.infrastructure.output.adapter.repository;
 
-import com.nisum.userapi.model.User;
-import com.nisum.userapi.infrastructure.repository.UserRepository;
+import com.nisum.userapi.domain.User;
+import com.nisum.userapi.infrastructure.output.adapter.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

@@ -9,9 +9,9 @@ import com.nisum.userapi.application.port.in.DeleteUserUseCase;
 import com.nisum.userapi.application.port.in.UpdateUserUseCase;
 import com.nisum.userapi.application.port.in.PatchUserUseCase;
 import com.nisum.userapi.exception.UserApiException;
-import com.nisum.userapi.model.Phone;
-import com.nisum.userapi.model.User;
-import com.nisum.userapi.application.port.out.JwtPort;
+import com.nisum.userapi.domain.Phone;
+import com.nisum.userapi.domain.User;
+import com.nisum.userapi.application.port.in.JwtPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -77,8 +77,13 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
 
     @Transactional
     public Mono<Void> delete(UUID id) {
-        return userPersistencePort.deleteById(id)
-                .then(phonePersistencePort.deleteByUserId(id));
+        return userPersistencePort.findById(id)
+                .flatMap(user -> {
+                    user.setActive(false);
+                    user.setModified(LocalDateTime.now());
+                    return userPersistencePort.save(user)
+                            .then();
+                });
     }
 
     @Transactional
@@ -89,6 +94,7 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
                     existing.setEmail(user.getEmail());
                     existing.setPassword(user.getPassword());
                     existing.setModified(LocalDateTime.now());
+                    existing.setActive(true);
                     replacePhones(id, user.getPhones());
                     return userPersistencePort.save(existing);
                 }).switchIfEmpty(
@@ -117,6 +123,7 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
                     }
 
                     existing.setModified(LocalDateTime.now());
+                    existing.setActive(true);
                     return userPersistencePort.save(existing);
                 })
                 .switchIfEmpty(

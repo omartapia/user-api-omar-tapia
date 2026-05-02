@@ -1,4 +1,4 @@
-package com.nisum.userapi.infrastructure.input.rest;
+package com.nisum.userapi.infrastructure.input.adapter.rest;
 
 import com.nisum.userapi.api.UsersApi;
 import com.nisum.userapi.dto.UserRequest;
@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-public class UserController implements UsersApi {
+public class UserControllerAdapter implements UsersApi {
     private final CreateUserUseCase createUserUseCase;
     private final ListUsersUseCase listUsersUseCase;
     private final GetUserUseCase getUserUseCase;

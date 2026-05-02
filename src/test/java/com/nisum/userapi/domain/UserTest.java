@@ -1,8 +1,8 @@
-package com.nisum.userapi.model;
+package com.nisum.userapi.domain;
 
+import com.nisum.userapi.domain.User;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;

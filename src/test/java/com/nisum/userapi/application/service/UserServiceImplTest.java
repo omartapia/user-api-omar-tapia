@@ -1,12 +1,12 @@
-package com.nisum.userapi.service;
+package com.nisum.userapi.application.service;
 
 import com.nisum.userapi.application.port.out.PhonePersistencePort;
 import com.nisum.userapi.application.port.out.UserPersistencePort;
 import com.nisum.userapi.application.service.UserApplicationService;
 import com.nisum.userapi.exception.UserApiException;
-import com.nisum.userapi.model.Phone;
-import com.nisum.userapi.model.User;
-import com.nisum.userapi.application.port.out.JwtPort;
+import com.nisum.userapi.domain.Phone;
+import com.nisum.userapi.domain.User;
+import com.nisum.userapi.application.port.in.JwtPort;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -107,14 +107,16 @@ class UserApplicationServiceTest {
     void givenExistingUserIdWhenDeleteUserThenDeletesById() {
         // given
         UUID id = UUID.randomUUID();
-        when(repository.deleteById(id)).thenReturn(Mono.empty());
-        when(phoneRepository.deleteByUserId(id)).thenReturn(Mono.empty());
+        User existing = new User();
+        existing.setId(id);
+        when(repository.findById(id)).thenReturn(Mono.just(existing));
+        when(repository.save(any())).thenReturn(Mono.empty());
         // when
        var result = StepVerifier.create(service.delete(id));
 
         // then
         result.verifyComplete();
-        verify(repository).deleteById(id);
+        verify(repository).save(any());
     }
 
     @Test

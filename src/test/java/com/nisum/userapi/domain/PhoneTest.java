@@ -1,5 +1,6 @@
-package com.nisum.userapi.model;
+package com.nisum.userapi.domain;
 
+import com.nisum.userapi.domain.Phone;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;

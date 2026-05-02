@@ -1,11 +1,11 @@
-package com.nisum.userapi.infrastructure.adapter;
+package com.nisum.userapi.infrastructure.output.adapter;
 
 import com.nisum.userapi.application.port.out.PhonePersistencePort;
 import com.nisum.userapi.application.port.out.UserPersistencePort;
-import com.nisum.userapi.infrastructure.repository.PhoneRepository;
-import com.nisum.userapi.infrastructure.repository.UserRepository;
-import com.nisum.userapi.model.Phone;
-import com.nisum.userapi.model.User;
+import com.nisum.userapi.infrastructure.output.adapter.repository.PhoneRepository;
+import com.nisum.userapi.infrastructure.output.adapter.repository.UserRepository;
+import com.nisum.userapi.domain.Phone;
+import com.nisum.userapi.domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 

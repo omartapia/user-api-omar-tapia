@@ -1,6 +1,6 @@
 package com.nisum.userapi.filter;
 
-import com.nisum.userapi.application.port.out.JwtPort;
+import com.nisum.userapi.application.port.in.JwtPort;
 import static  com.nisum.userapi.utils.SecurityConstants.BEARER_PREFIX;
 import static  com.nisum.userapi.utils.SecurityConstants.AUTHORIZATION_HEADER;
 import lombok.RequiredArgsConstructor;

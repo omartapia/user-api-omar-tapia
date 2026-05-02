@@ -3,8 +3,8 @@ package com.nisum.userapi.mapper;
 import com.nisum.userapi.dto.PhoneRequest;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
-import com.nisum.userapi.model.Phone;
-import com.nisum.userapi.model.User;
+import com.nisum.userapi.domain.Phone;
+import com.nisum.userapi.domain.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

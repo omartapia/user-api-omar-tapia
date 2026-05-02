@@ -1,6 +1,6 @@
-package com.nisum.userapi.infrastructure.repository;
+package com.nisum.userapi.infrastructure.output.adapter.repository;
 
-import com.nisum.userapi.model.User;
+import com.nisum.userapi.domain.User;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;
 

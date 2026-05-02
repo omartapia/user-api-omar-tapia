@@ -1,4 +1,4 @@
-package com.nisum.userapi.controller;
+package com.nisum.userapi.infrastructure.input.adapter.rest;
 
 import com.nisum.userapi.application.port.in.CreateUserUseCase;
 import com.nisum.userapi.application.port.in.ListUsersUseCase;
@@ -6,8 +6,9 @@ import com.nisum.userapi.application.port.in.GetUserUseCase;
 import com.nisum.userapi.application.port.in.DeleteUserUseCase;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
+import com.nisum.userapi.infrastructure.input.adapter.rest.UserControllerAdapter;
 import com.nisum.userapi.mapper.UserMapper;
-import com.nisum.userapi.model.User;
+import com.nisum.userapi.domain.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,12 +24,11 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UserControllerTest {
+class UserControllerAdapterTest {
     @Mock
     private CreateUserUseCase createUserUseCase;
     @Mock
@@ -41,7 +41,7 @@ class UserControllerTest {
     @Mock
     private UserMapper mapper;
     @InjectMocks
-    private UserController controller;
+    private UserControllerAdapter controller;
 
     @Test
     void givenValidUserRequestWhenCreateUserThenReturnsUserResponse() {
