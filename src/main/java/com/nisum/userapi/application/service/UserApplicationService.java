@@ -13,6 +13,7 @@ import com.nisum.userapi.domain.Phone;
 import com.nisum.userapi.domain.User;
 import com.nisum.userapi.application.port.in.JwtPort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,18 +30,34 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class UserApplicationService implements CreateUserUseCase, ListUsersUseCase, GetUserUseCase, DeleteUserUseCase, UpdateUserUseCase, PatchUserUseCase {
     private final UserPersistencePort userPersistencePort;
     private final PhonePersistencePort phonePersistencePort;
     private final JwtPort jwtPort;
 
-    // resilience components (simple defaults); consider moving to config
-    private static final CircuitBreaker userCircuit = CircuitBreaker.ofDefaults("userServiceCircuit");
-    private static final Retry userRetry = Retry.ofDefaults("userServiceRetry");
+    // resilience components (provided via configuration)
+    private final CircuitBreaker userCircuit;
+    private final Retry userRetry;
 
-    private static final CircuitBreaker phoneCircuit = CircuitBreaker.ofDefaults("phoneServiceCircuit");
-    private static final Retry phoneRetry = Retry.ofDefaults("phoneServiceRetry");
+    private final CircuitBreaker phoneCircuit;
+    private final Retry phoneRetry;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public UserApplicationService(UserPersistencePort userPersistencePort,
+                                  PhonePersistencePort phonePersistencePort,
+                                  JwtPort jwtPort,
+                                  @org.springframework.beans.factory.annotation.Qualifier("userCircuitBreaker") CircuitBreaker userCircuit,
+                                  @org.springframework.beans.factory.annotation.Qualifier("userRetry") Retry userRetry,
+                                  @org.springframework.beans.factory.annotation.Qualifier("phoneCircuitBreaker") CircuitBreaker phoneCircuit,
+                                  @org.springframework.beans.factory.annotation.Qualifier("phoneRetry") Retry phoneRetry) {
+        this.userPersistencePort = userPersistencePort;
+        this.phonePersistencePort = phonePersistencePort;
+        this.jwtPort = jwtPort;
+        this.userCircuit = userCircuit;
+        this.userRetry = userRetry;
+        this.phoneCircuit = phoneCircuit;
+        this.phoneRetry = phoneRetry;
+    }
 
     @Transactional
     public Mono<User> create(User user) {
@@ -51,9 +68,7 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
         user.setActive(true);
         user.setToken(jwtPort.generate(user.getEmail()));
 
-        return userPersistencePort.save(user)
-                .transformDeferred(RetryOperator.of(userRetry))
-                .transformDeferred(CircuitBreakerOperator.of(userCircuit))
+        return withRetryAndCircuit(userPersistencePort.save(user), userRetry, userCircuit)
                 .flatMap(saved ->
                         persistPhones(saved.getId(), user.getPhones())
                                 .collectList()
@@ -113,6 +128,7 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
                     existing.setPassword(user.getPassword());
                     existing.setModified(LocalDateTime.now());
                     existing.setActive(true);
+                    // keep replacePhones fire-and-forget to preserve existing behavior/tests
                     replacePhones(id, user.getPhones());
                     return userPersistencePort.save(existing);
                 }).switchIfEmpty(
@@ -159,10 +175,30 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
         return Flux.fromIterable(phones)
                 .flatMap(phone -> {
                     phone.setUserId(userId);
-                    return phonePersistencePort.save(phone)
-                            .transformDeferred(RetryOperator.of(phoneRetry))
-                            .transformDeferred(CircuitBreakerOperator.of(phoneCircuit))
+                    return withRetryAndCircuit(phonePersistencePort.save(phone), phoneRetry, phoneCircuit)
                             .onErrorMap(err -> new UserApiException("Error persisting phone", HttpStatus.SERVICE_UNAVAILABLE));
                 });
+    }
+
+    private <T> Mono<T> withRetryAndCircuit(Mono<T> mono, Retry retry, CircuitBreaker cb) {
+        Mono<T> m = mono;
+        if (retry != null) {
+            m = m.transformDeferred(RetryOperator.of(retry));
+        }
+        if (cb != null) {
+            m = m.transformDeferred(CircuitBreakerOperator.of(cb));
+        }
+        return m;
+    }
+
+    private <T> Flux<T> withRetryAndCircuit(Flux<T> flux, Retry retry, CircuitBreaker cb) {
+        Flux<T> f = flux;
+        if (retry != null) {
+            f = f.transformDeferred(fl -> fl.transformDeferred(RetryOperator.of(retry)));
+        }
+        if (cb != null) {
+            f = f.transformDeferred(fl -> fl.transformDeferred(CircuitBreakerOperator.of(cb)));
+        }
+        return f;
     }
 }
