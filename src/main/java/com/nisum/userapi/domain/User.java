@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +26,6 @@ public class User {
     private String token;
     private boolean active;
     @Transient
-    private List<Phone> phones;
+    private List<Phone> phones = new ArrayList<>();
 
 }

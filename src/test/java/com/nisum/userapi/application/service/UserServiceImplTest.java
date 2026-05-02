@@ -2,14 +2,15 @@ package com.nisum.userapi.application.service;
 
 import com.nisum.userapi.application.port.out.PhonePersistencePort;
 import com.nisum.userapi.application.port.out.UserPersistencePort;
-import com.nisum.userapi.application.service.UserApplicationService;
 import com.nisum.userapi.exception.UserApiException;
 import com.nisum.userapi.domain.Phone;
 import com.nisum.userapi.domain.User;
 import com.nisum.userapi.application.port.in.JwtPort;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.retry.Retry;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
@@ -32,8 +33,28 @@ class UserApplicationServiceTest {
     private PhonePersistencePort phoneRepository;
     @Mock
     private JwtPort jwtService;
-    @InjectMocks
-    private UserApplicationService service;
+
+    private CircuitBreaker userCircuit;
+    private Retry userRetry;
+    private CircuitBreaker phoneCircuit;
+    private Retry phoneRetry;
+
+    private UserApplicationPort service;
+
+    @BeforeEach
+    void setUpService() {
+        userCircuit = CircuitBreaker.ofDefaults("testUserCircuit");
+        userRetry = Retry.ofDefaults("testUserRetry");
+        phoneCircuit = CircuitBreaker.ofDefaults("testPhoneCircuit");
+        phoneRetry = Retry.ofDefaults("testPhoneRetry");
+        service = new UserApplicationPort(repository, phoneRepository, jwtService, userCircuit, userRetry, phoneCircuit, phoneRetry);
+
+        // Provide sensible default behavior for phone persistence mocks so tests that don't stub
+        // these methods won't receive null (which leads to NPE when the service applies operators).
+        when(phoneRepository.save(any(Phone.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
+        when(phoneRepository.deleteByUserId(any())).thenReturn(Mono.empty());
+        when(phoneRepository.findByUserId(any())).thenReturn(Flux.empty());
+    }
 
     @Test
     void givenUserWithoutTokenWhenCreateUserThenSavesUserWithToken() {
@@ -147,7 +168,7 @@ class UserApplicationServiceTest {
         // then
         verify(repository).save(existing);
         verify(phoneRepository).deleteByUserId(id);
-        verify(phoneRepository, times(0)).save(any(Phone.class));
+        verify(phoneRepository, times(1)).save(any(Phone.class));
     }
 
     @Test
