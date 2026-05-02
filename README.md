@@ -40,3 +40,5 @@ Notes
   ./gradlew test --info
 
 If you want, I can add CI configuration to run tests automatically on push.
+
+Postman collection: src/main/resources/User_API_Enterprise.postman_collection.json
