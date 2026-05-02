@@ -1,5 +1,7 @@
 # User API WebFlux + JWT
 
+Author: omartapia <omar.tapia.h@gmail.com>
+
 - WebFlux
 - CRUD H2
 - @Valid
