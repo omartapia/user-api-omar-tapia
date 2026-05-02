@@ -52,6 +52,7 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
     @Override
     public Flux<User> list() {
         return userPersistencePort.findAll()
+                .filter(User::isActive)
                 .flatMap(user ->
                         phonePersistencePort.findByUserId(user.getId())
                                 .collectList()
@@ -59,7 +60,8 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
                                     user.setPhones(phones);
                                     return user;
                                 })
-                );
+                )
+                .switchIfEmpty(Flux.error(new UserApiException("No user where found", HttpStatus.NOT_FOUND)));
     }
 
     @Override
@@ -72,7 +74,8 @@ public class UserApplicationService implements CreateUserUseCase, ListUsersUseCa
                                     user.setPhones(phones);
                                     return user;
                                 })
-                );
+                )
+                .switchIfEmpty(Mono.error(new UserApiException("No user where found", HttpStatus.NOT_FOUND)));
     }
 
     @Transactional

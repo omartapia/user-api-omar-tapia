@@ -64,8 +64,10 @@ class UserApplicationServiceTest {
         // given
         User firstUser = new User();
         firstUser.setId(UUID.randomUUID());
+        firstUser.setActive(true);
         User secondUser = new User();
         secondUser.setId(UUID.randomUUID());
+        secondUser.setActive(true);
         when(repository.findAll()).thenReturn(Flux.fromIterable(List.of(firstUser, secondUser)));
         when(phoneRepository.findByUserId(any())).thenReturn(Flux.empty());
         // when
@@ -100,7 +102,7 @@ class UserApplicationServiceTest {
         StepVerifier.FirstStep<User> result = StepVerifier.create(service.get(id));
 
         // then
-        result.verifyComplete();
+        result.expectError(UserApiException.class).verify();
     }
 
     @Test
