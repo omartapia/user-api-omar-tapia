@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "omartapia/user-api-omar-tapia:${env.BRANCH_NAME}"
+        DOCKER_IMAGE = "omartapia/user-api-omar-tapia:${GIT_BRANCH}"
     }
 
     stages {
