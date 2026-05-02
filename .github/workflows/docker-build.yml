@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - develop   # Se ejecuta también cuando hay push en develop
+      - develop
 
 jobs:
   build-jar:
@@ -12,33 +12,28 @@ jobs:
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
-        # Trae tu repo a la VM de GitHub Actions
 
       - name: Configurar JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
-        # Instala Java para compilar tu proyecto con Gradle
 
       - name: Dar permisos a gradlew
         run: chmod +x gradlew
-        # Asegura que el wrapper de Gradle sea ejecutable
 
       - name: Compilar con Gradle
         run: ./gradlew clean build -x test
-        # Construye el JAR en build/libs/
 
       - name: Guardar JAR como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: app-jar
           path: build/libs/*.jar
-        # Sube el JAR para que otros jobs lo usen
 
   docker-build:
     runs-on: ubuntu-latest
-    needs: build-jar   # Este job depende del anterior
+    needs: build-jar
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
@@ -48,19 +43,18 @@ jobs:
         with:
           name: app-jar
           path: build/libs/
-        # Recupera el JAR compilado
 
       - name: Login en Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-        # Usa tus credenciales guardadas en GitHub Secrets
 
       - name: Construir y publicar imagen Docker
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: miusuario/mi-app:latest
-        # Construye la imagen usando tu Dockerfile y la sube a Docker Hub
+          tags: |
+            miusuario/mi-app:${{ github.ref_name }}
+            miusuario/mi-app:latest
