@@ -2,7 +2,9 @@ name: CI/CD Pipeline (Gradle + Docker)
 
 on:
   push:
-    branches: [ "master" ]   # Se ejecuta cada vez que haces push a master
+    branches:
+      - master
+      - develop   # Se ejecuta también cuando hay push en develop
 
 jobs:
   build-jar:
@@ -28,7 +30,7 @@ jobs:
         # Construye el JAR en build/libs/
 
       - name: Guardar JAR como artefacto
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-jar
           path: build/libs/*.jar
@@ -42,7 +44,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Descargar JAR artefacto
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-jar
           path: build/libs/
