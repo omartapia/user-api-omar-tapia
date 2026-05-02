@@ -2,19 +2,22 @@ name: CI/CD Pipeline (Gradle + Docker)
 
 on:
   push:
-    branches: 
+    branches:
       - master
       - develop
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-jar:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Configurar JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -36,7 +39,7 @@ jobs:
     needs: build-jar
     steps:
       - name: Checkout del código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Descargar JAR artefacto
         uses: actions/download-artifact@v4
@@ -56,5 +59,9 @@ jobs:
           context: .
           push: true
           tags: |
-            miusuario/mi-app:${{ github.ref_name }}
-            miusuario/mi-app:latest
+            omartapia/user-api-omar-tapia:${{ github.ref_name }}
+      - name: Etiquetar como latest si es master
+        if: github.ref_name == 'master'
+        run: |
+          docker tag omartapia/user-api-omar-tapia:master omartapia/user-api-omar-tapia:latest
+          docker push omartapia/user-api-omar-tapia:latest

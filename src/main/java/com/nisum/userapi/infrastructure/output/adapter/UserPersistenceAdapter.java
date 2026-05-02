@@ -31,11 +31,6 @@ public class UserPersistenceAdapter implements UserPersistencePort {
     }
 
     @Override
-    public Mono<Void> deleteById(UUID id) {
-        return userRepository.deleteById(id);
-    }
-
-    @Override
     public Mono<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }

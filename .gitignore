@@ -29,7 +29,7 @@ logs/
 build/
 target/
 .gradle/
-out/
+/out/
 
 # Archivos compilados
 
@@ -119,8 +119,12 @@ swagger-ui/
 *.tmp
 *.bak
 .codex
-/out
-/build
 /.idea
+vtcode.toml
 
 
+
+# =========================
+#  exclusions
+# =========================
+!gradle/wrapper/gradle-wrapper.jar

@@ -14,7 +14,13 @@ API REST para crear y administrar usuarios con Spring Boot, WebFlux, R2DBC, H2 e
 ```bash
 ./gradlew bootRun
 ```
+## Ejecutar con Docker
 
+```bash
+./gradlew clea build
+docker build -t user-api-omar-tapia:latest .
+docker run -d --name user-api-omar-tapia -p 8080:8080 user-api-omar-tapia:latest  
+```
 La API queda disponible en:
 
 ```text
