@@ -1,11 +1,13 @@
 package com.nisum.userapi.exception;
 
 import com.nisum.userapi.dto.ErrorResponse;
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ServerWebInputException;
 
@@ -70,6 +72,16 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse();
         error.setMensaje("Error interno del servidor");
 
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+
+    @ExceptionHandler(R2dbcDataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<ErrorResponse> handleIntegrity(R2dbcDataIntegrityViolationException ex) {
+        ErrorResponse error = new ErrorResponse();
+        error.setMensaje("Violación de integridad: " + ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);

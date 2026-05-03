@@ -6,11 +6,14 @@ import com.nisum.userapi.application.port.out.PhoneRepository;
 import com.nisum.userapi.application.port.out.UserCustomRepository;
 import com.nisum.userapi.application.port.out.UserRepository;
 import com.nisum.userapi.domain.User;
+import com.nisum.userapi.exception.UserApiException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
 import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -20,6 +23,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserApplicationService implements UserApplicationPort {
 
     private final UserRepository userRepository;
@@ -29,6 +33,8 @@ public class UserApplicationService implements UserApplicationPort {
 
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
+
+    private final Mono<User> userNotFound = Mono.error(new UserApiException("No se han usuario(s)", HttpStatus.NOT_FOUND));
 
     // CREATE
     @Override
@@ -61,9 +67,9 @@ public class UserApplicationService implements UserApplicationPort {
 
     @Override
     public Mono<User> get(UUID id) {
-
         return Mono.defer(() ->
                         userCustomRepository.findByIdWithPhones(id)
+                                .switchIfEmpty(userNotFound(id))
                 )
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .transformDeferred(RetryOperator.of(retry));
@@ -74,6 +80,10 @@ public class UserApplicationService implements UserApplicationPort {
 
         return Flux.defer(() ->
                         userCustomRepository.findUsersWithPhonesPaged(page, size)
+                                .switchIfEmpty(Mono.error(new UserApiException(
+                                        "No se encontraron usuarios con los criterios especificados",
+                                        HttpStatus.NOT_FOUND
+                                )))
                 )
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .transformDeferred(RetryOperator.of(retry));
@@ -86,6 +96,7 @@ public class UserApplicationService implements UserApplicationPort {
                         phoneRepository.findByUserId(id)
                                 .flatMap(phoneRepository::delete)
                                 .then(userRepository.deleteById(id))
+
                 )
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .transformDeferred(RetryOperator.of(retry));
@@ -96,7 +107,7 @@ public class UserApplicationService implements UserApplicationPort {
 
         return Mono.defer(() ->
                         userCustomRepository.findByIdWithPhones(id)
-                                .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
+                                .switchIfEmpty(userNotFound(id))
                                 .flatMap(existing -> {
 
                                     if (patch.getName() != null) existing.setName(patch.getName());
@@ -120,7 +131,7 @@ public class UserApplicationService implements UserApplicationPort {
     public Mono<User> update(UUID id, User user) {
         return Mono.defer(() ->
                         userCustomRepository.findByIdWithPhones(id)
-                                .switchIfEmpty(Mono.error(new RuntimeException("User not found")))
+                                .switchIfEmpty(userNotFound(id))
                                 .flatMap(existing -> {
 
                                     existing.setName(user.getName());
@@ -150,5 +161,13 @@ public class UserApplicationService implements UserApplicationPort {
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .transformDeferred(RetryOperator.of(retry));
     }
+
+    private Mono<User> userNotFound(UUID id) {
+        return Mono.error(new UserApiException(
+                "Usuario con id " + id + " no encontrado",
+                HttpStatus.NOT_FOUND
+        ));
+    }
+
 }
 

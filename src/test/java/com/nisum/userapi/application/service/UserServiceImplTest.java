@@ -128,13 +128,11 @@ class UserApplicationServiceTest {
         UUID id = UUID.randomUUID();
         when(userCustomRepository.findByIdWithPhones(id)).thenReturn(Mono.empty());
 
-        // when
+        // when & then
         StepVerifier.create(service.get(id))
-                .expectComplete()
+                .expectError(RuntimeException.class)
                 .verify();
 
-        // then
-        verify(userCustomRepository).findByIdWithPhones(id);
     }
 
     @Test
