@@ -3,6 +3,7 @@ package com.nisum.userapi.infrastructure.output.adapter.repository;
 import com.nisum.userapi.application.port.out.UserCustomRepository;
 import com.nisum.userapi.domain.Phone;
 import com.nisum.userapi.domain.User;
+import io.r2dbc.spi.Row;
 import lombok.RequiredArgsConstructor;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,8 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -48,15 +49,11 @@ public class UserCustomRepositoryAdapter implements UserCustomRepository {
                 .bind("offset", offset)
                 .map((row, meta) -> row)
                 .all()
-                // Agrupamos por user_id
                 .collectMultimap(r -> r.get("user_id", UUID.class))
                 .flatMapMany(map -> Flux.fromIterable(map.entrySet()))
                 .map(entry -> {
                     UUID userId = entry.getKey();
-                    List<Map<String, Object>> rows = entry.getValue().stream()
-                            .map(r -> (Map<String, Object>) r)
-                            .toList();
-
+                    List<Row> rows = entry.getValue().stream().toList();
                     return mapToUser(rows);
                 });
     }
@@ -83,50 +80,43 @@ public class UserCustomRepositoryAdapter implements UserCustomRepository {
                             WHERE u.id = :id
                         """)
                 .bind("id", id)
-                .map((row, meta) -> row)
+                .map((row, meta) -> row) // devolvemos directamente Row
                 .all()
                 .collectList()
                 .flatMap(rows -> {
                     if (rows.isEmpty()) {
                         return Mono.empty();
                     }
-
-                    List<Map<String, Object>> mappedRows = rows.stream()
-                            .map(r -> (Map<String, Object>) r)
-                            .toList();
-
-                    return Mono.just(mapToUser(mappedRows));
+                    return Mono.just(mapToUser(rows));
                 });
     }
 
-    private User mapToUser(List<Map<String, Object>> rows) {
-        if (rows.isEmpty()) {
-            return null;
-        }
+    private User mapToUser(List<Row> rows) {
+        if (rows.isEmpty()) return null;
 
-        Map<String, Object> first = rows.get(0);
-        UUID userId = (UUID) first.get("user_id");
+        Row first = rows.get(0);
+        UUID userId = first.get("user_id", UUID.class);
 
         User user = new User();
         user.setId(userId);
-        user.setName((String) first.get("name"));
-        user.setEmail((String) first.get("email"));
-        user.setPassword((String) first.get("password"));
-        user.setCreated((LocalDateTime) first.get("created"));
-        user.setModified((LocalDateTime) first.get("modified"));
-        user.setLastLogin((LocalDateTime) first.get("last_login"));
-        user.setToken((String) first.get("token"));
-        user.setActive(Boolean.TRUE.equals(first.get("active")));
+        user.setName(first.get("name", String.class));
+        user.setEmail(first.get("email", String.class));
+        user.setPassword(first.get("password", String.class));
+        user.setCreated(first.get("created", LocalDateTime.class));
+        user.setModified(first.get("modified", LocalDateTime.class));
+        user.setLastLogin(first.get("last_login", LocalDateTime.class));
+        user.setToken(first.get("token", String.class));
+        user.setActive(Boolean.TRUE.equals(first.get("active", Boolean.class)));
 
         List<Phone> phones = new ArrayList<>();
-        for (var r : rows) {
-            UUID phoneId = (UUID) r.get("phone_id");
+        for (Row r : rows) {
+            UUID phoneId = r.get("phone_id", UUID.class);
             if (phoneId != null) {
                 Phone p = new Phone();
                 p.setId(phoneId);
-                p.setNumber((String) r.get("number"));
-                p.setCitycode((String) r.get("city_code"));
-                p.setContrycode((String) r.get("contry_code"));
+                p.setNumber(r.get("number", String.class));
+                p.setCitycode(r.get("city_code", String.class));
+                p.setContrycode(r.get("contry_code", String.class));
                 p.setUserId(userId);
                 phones.add(p);
             }
@@ -134,4 +124,5 @@ public class UserCustomRepositoryAdapter implements UserCustomRepository {
         user.setPhones(phones);
         return user;
     }
+
 }

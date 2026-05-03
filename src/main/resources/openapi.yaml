@@ -146,7 +146,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserRequest'
+              $ref: '#/components/schemas/UserPatchRequest'
             examples:
               ejemplo:
                 value:
@@ -220,6 +220,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PhoneRequest'
+
+    UserPatchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Juan Actualizado"
+        email:
+          type: string
+          format: email
+          example: "nuevo@correo.org"
+        password:
+          type: string
+          example: "hunter2"
+        phones:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneRequest'
+
     PhoneRequest:
       type: object
       required: [number, citycode, contrycode]
@@ -233,6 +252,7 @@ components:
         contrycode:
           type: string
           example: "57"
+
     UserResponse:
       type: object
       properties:
@@ -260,6 +280,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PhoneRequest'
+
     ErrorResponse:
       type: object
       properties:
