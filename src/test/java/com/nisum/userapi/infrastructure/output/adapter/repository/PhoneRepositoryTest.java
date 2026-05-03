@@ -1,5 +1,6 @@
 package com.nisum.userapi.infrastructure.output.adapter.repository;
 
+import com.nisum.userapi.application.port.out.PhoneRepository;
 import com.nisum.userapi.domain.Phone;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -11,7 +11,7 @@ public interface UserApplicationPort {
     Mono<User> create(User user);
     Mono<Void> delete(UUID id);
     Mono<User> get(UUID uuid);
-    Flux<User> list();
+    Flux<User> list(int page, int size);
     Mono<User> patch(UUID id, User patch);
     Mono<User> update(UUID id, User user);
 }

@@ -52,6 +52,26 @@ paths:
       tags: [Users]
       summary: Listar usuarios
       operationId: listUsers
+      parameters:
+        - name: page
+          in: query
+          description: Número de página a recuperar (empieza en 1)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            example: 2
+        - name: size
+          in: query
+          description: Cantidad de usuarios por página
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+            example: 50
       responses:
         '200':
           description: Lista de usuarios

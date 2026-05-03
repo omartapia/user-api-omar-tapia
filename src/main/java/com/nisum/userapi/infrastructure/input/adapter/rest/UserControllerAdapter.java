@@ -32,9 +32,11 @@ public class UserControllerAdapter implements UsersApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<UserResponse>>> listUsers(ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Flux<UserResponse>>> listUsers(Integer page, Integer size, ServerWebExchange exchange) {
+        int pageNum = page != null ? page - 1 : 0; // Convertir a 0-indexed
+        int sizeNum = size != null ? size : 20;
         return Mono.just(
-                ResponseEntity.ok(userApplicationService.list().map(mapper::toResponse))
+                ResponseEntity.ok(userApplicationService.list(pageNum, sizeNum).map(mapper::toResponse))
         );
     }
 

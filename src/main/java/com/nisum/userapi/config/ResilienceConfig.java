@@ -17,14 +17,4 @@ public class ResilienceConfig {
     public Retry userRetry() {
         return Retry.ofDefaults("userServiceRetry");
     }
-
-    @Bean
-    public CircuitBreaker phoneCircuitBreaker() {
-        return CircuitBreaker.ofDefaults("phoneServiceCircuit");
-    }
-
-    @Bean
-    public Retry phoneRetry() {
-        return Retry.ofDefaults("phoneServiceRetry");
-    }
 }
