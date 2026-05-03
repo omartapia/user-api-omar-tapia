@@ -1,5 +1,6 @@
 package com.nisum.userapi.application.service;
 
+import com.nisum.userapi.application.port.in.JwtPort;
 import com.nisum.userapi.application.port.in.UserApplicationPort;
 import com.nisum.userapi.application.port.out.PhoneRepository;
 import com.nisum.userapi.application.port.out.UserCustomRepository;
@@ -24,6 +25,7 @@ public class UserApplicationService implements UserApplicationPort {
     private final UserRepository userRepository;
     private final PhoneRepository phoneRepository;
     private final UserCustomRepository userCustomRepository;
+    private final JwtPort jwtPort;
 
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
@@ -32,21 +34,27 @@ public class UserApplicationService implements UserApplicationPort {
     @Override
     public Mono<User> create(User user) {
 
-        return Mono.defer(() ->
-                        userRepository.save(user)
-                                .flatMap(saved ->
-                                        Flux.fromIterable(user.getPhones())
-                                                .flatMap(phone -> {
-                                                    phone.setUserId(saved.getId());
-                                                    return phoneRepository.save(phone);
-                                                })
-                                                .collectList()
-                                                .map(phones -> {
-                                                    saved.setPhones(phones);
-                                                    return saved;
-                                                })
-                                )
-                )
+        return Mono.defer(() -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    user.setCreated(now);
+                    user.setModified(now);
+                    user.setLastLogin(now);
+                    user.setActive(true);
+                    user.setToken(jwtPort.generate(user.getEmail()));
+                    return userRepository.save(user)
+                            .flatMap(saved ->
+                                    Flux.fromIterable(user.getPhones())
+                                            .flatMap(phone -> {
+                                                phone.setUserId(saved.getId());
+                                                return phoneRepository.save(phone);
+                                            })
+                                            .collectList()
+                                            .map(phones -> {
+                                                saved.setPhones(phones);
+                                                return saved;
+                                            })
+                            );
+                })
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .transformDeferred(RetryOperator.of(retry));
     }

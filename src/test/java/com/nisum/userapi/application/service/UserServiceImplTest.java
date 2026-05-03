@@ -1,5 +1,6 @@
 package com.nisum.userapi.application.service;
 
+import com.nisum.userapi.application.port.in.JwtPort;
 import com.nisum.userapi.application.port.out.PhoneRepository;
 import com.nisum.userapi.application.port.out.UserCustomRepository;
 import com.nisum.userapi.application.port.out.UserRepository;
@@ -32,6 +33,8 @@ class UserApplicationServiceTest {
     private PhoneRepository phoneRepository;
     @Mock
     private UserCustomRepository userCustomRepository;
+    @Mock
+    private JwtPort jwtPort;
 
     private UserApplicationService service;
 
@@ -39,7 +42,7 @@ class UserApplicationServiceTest {
     void setUpService() {
         CircuitBreaker circuitBreaker = CircuitBreaker.ofDefaults("testCircuit");
         Retry retry = Retry.ofDefaults("testRetry");
-        service = new UserApplicationService(userRepository, phoneRepository, userCustomRepository, circuitBreaker, retry);
+        service = new UserApplicationService(userRepository, phoneRepository, userCustomRepository, jwtPort, circuitBreaker, retry);
     }
 
     @Test
@@ -66,6 +69,7 @@ class UserApplicationServiceTest {
 
         when(userRepository.save(user)).thenReturn(Mono.just(savedUser));
         when(phoneRepository.save(any(Phone.class))).thenReturn(Mono.just(savedPhone));
+        when(jwtPort.generate("test@example.com")).thenReturn("mock-jwt-token");
 
         // when
         StepVerifier.create(service.create(user))

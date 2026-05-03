@@ -57,34 +57,7 @@ public class UserCustomRepositoryAdapter implements UserCustomRepository {
                             .map(r -> (Map<String, Object>) r)
                             .toList();
 
-                    var first = rows.get(0);
-
-                    User user = new User();
-                    user.setId(userId);
-                    user.setName((String) first.get("name"));
-                    user.setEmail((String) first.get("email"));
-                    user.setPassword((String) first.get("password"));
-                    user.setCreated((LocalDateTime) first.get("created"));
-                    user.setModified((LocalDateTime) first.get("modified"));
-                    user.setLastLogin((LocalDateTime) first.get("last_login"));
-                    user.setToken((String) first.get("token"));
-                    user.setActive(Boolean.TRUE.equals(first.get("active")));
-
-                    List<Phone> phones = new ArrayList<>();
-                    for (var r : rows) {
-                        UUID phoneId = (UUID) r.get("phone_id");
-                        if (phoneId != null) {
-                            Phone p = new Phone();
-                            p.setId(phoneId);
-                            p.setNumber((String) r.get("number"));
-                            p.setCitycode((String) r.get("city_code"));
-                            p.setContrycode((String) r.get("contry_code"));
-                            p.setUserId(userId);
-                            phones.add(p);
-                        }
-                    }
-                    user.setPhones(phones);
-                    return user;
+                    return mapToUser(rows);
                 });
     }
 
@@ -118,35 +91,47 @@ public class UserCustomRepositoryAdapter implements UserCustomRepository {
                         return Mono.empty();
                     }
 
-                    Map<String, Object> first = (Map<String, Object>) rows.get(0);
-                    UUID userId = (UUID) first.get("user_id");
+                    List<Map<String, Object>> mappedRows = rows.stream()
+                            .map(r -> (Map<String, Object>) r)
+                            .toList();
 
-                    User user = new User();
-                    user.setId(userId);
-                    user.setName((String) first.get("name"));
-                    user.setEmail((String) first.get("email"));
-                    user.setPassword((String) first.get("password"));
-                    user.setCreated((LocalDateTime) first.get("created"));
-                    user.setModified((LocalDateTime) first.get("modified"));
-                    user.setLastLogin((LocalDateTime) first.get("last_login"));
-                    user.setToken((String) first.get("token"));
-                    user.setActive(Boolean.TRUE.equals(first.get("active")));
-
-                    List<Phone> phones = new ArrayList<>();
-                    for (var r : rows) {
-                        UUID phoneId = (UUID) r.get("phone_id");
-                        if (phoneId != null) {
-                            Phone p = new Phone();
-                            p.setId(phoneId);
-                            p.setNumber((String) r.get("number"));
-                            p.setCitycode((String) r.get("city_code"));
-                            p.setContrycode((String) r.get("contry_code"));
-                            p.setUserId(userId);
-                            phones.add(p);
-                        }
-                    }
-                    user.setPhones(phones);
-                    return Mono.just(user);
+                    return Mono.just(mapToUser(mappedRows));
                 });
+    }
+
+    private User mapToUser(List<Map<String, Object>> rows) {
+        if (rows.isEmpty()) {
+            return null;
+        }
+
+        Map<String, Object> first = rows.get(0);
+        UUID userId = (UUID) first.get("user_id");
+
+        User user = new User();
+        user.setId(userId);
+        user.setName((String) first.get("name"));
+        user.setEmail((String) first.get("email"));
+        user.setPassword((String) first.get("password"));
+        user.setCreated((LocalDateTime) first.get("created"));
+        user.setModified((LocalDateTime) first.get("modified"));
+        user.setLastLogin((LocalDateTime) first.get("last_login"));
+        user.setToken((String) first.get("token"));
+        user.setActive(Boolean.TRUE.equals(first.get("active")));
+
+        List<Phone> phones = new ArrayList<>();
+        for (var r : rows) {
+            UUID phoneId = (UUID) r.get("phone_id");
+            if (phoneId != null) {
+                Phone p = new Phone();
+                p.setId(phoneId);
+                p.setNumber((String) r.get("number"));
+                p.setCitycode((String) r.get("city_code"));
+                p.setContrycode((String) r.get("contry_code"));
+                p.setUserId(userId);
+                phones.add(p);
+            }
+        }
+        user.setPhones(phones);
+        return user;
     }
 }
