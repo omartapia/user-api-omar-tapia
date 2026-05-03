@@ -79,13 +79,13 @@ class UserControllerAdapterIntegrationTest {
     void givenUsersWhenGetUsersThenReturnsUserList() {
         UUID firstId = UUID.randomUUID();
         UUID secondId = UUID.randomUUID();
-        when(userApplicationService.list()).thenReturn(Flux.just(
+        when(userApplicationService.list(0, 10)).thenReturn(Flux.just(
                 user(firstId, "Juan Rodriguez", "juan@rodriguez.org"),
                 user(secondId, "Maria Perez", "maria@perez.org")
         ));
 
         webTestClient.get()
-                .uri("/users")
+                .uri("/users?page=1&size=10")
                 .header("Authorization", "Bearer jwt-token")
                 .exchange()
                 .expectStatus().isOk()
@@ -292,7 +292,7 @@ class UserControllerAdapterIntegrationTest {
 
     @Test
     void givenUnexpectedServiceErrorWhenGetUsersThenReturnsInternalServerErrorResponse() {
-        when(userApplicationService.list()).thenReturn(Flux.error(new RuntimeException("boom")));
+        when(userApplicationService.list(0, 20)).thenReturn(Flux.error(new RuntimeException("boom")));
 
         webTestClient.get()
                 .uri("/users")

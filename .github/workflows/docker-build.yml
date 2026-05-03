@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - develop
-
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -60,8 +59,3 @@ jobs:
           push: true
           tags: |
             omartapia/user-api-omar-tapia:${{ github.ref_name }}
-      - name: Etiquetar como latest si es master
-        if: github.ref_name == 'master'
-        run: |
-          docker tag omartapia/user-api-omar-tapia:master omartapia/user-api-omar-tapia:latest
-          docker push omartapia/user-api-omar-tapia:latest

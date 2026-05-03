@@ -70,12 +70,12 @@ class UserControllerAdapterTest {
         User secondUser = new User();
         UserResponse firstResponse = new UserResponse();
         UserResponse secondResponse = new UserResponse();
-        when(service.list()).thenReturn(Flux.just(firstUser, secondUser));
+        when(service.list(0, 10)).thenReturn(Flux.just(firstUser, secondUser));
         when(mapper.toResponse(firstUser)).thenReturn(firstResponse);
         when(mapper.toResponse(secondUser)).thenReturn(secondResponse);
 
         // when
-        Mono<ResponseEntity<Flux<UserResponse>>> result = controller.listUsers(null);
+        Mono<ResponseEntity<Flux<UserResponse>>> result = controller.listUsers(1, 10, null);
 
         // then
         StepVerifier.create(result)

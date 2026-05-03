@@ -6,9 +6,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
-public interface UserPersistencePort {
-    Mono<User> save(User user);
-    Flux<User> findAll();
-    Mono<User> findById(UUID id);
-    Mono<User> findByEmail(String email);
+public interface UserCustomRepository {
+    Flux<User> findUsersWithPhonesPaged(int page, int size);
+    Mono<User> findByIdWithPhones(UUID id);
 }

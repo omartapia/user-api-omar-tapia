@@ -2,6 +2,7 @@ package com.nisum.userapi.infrastructure.input.adapter.rest;
 
 import com.nisum.userapi.api.UsersApi;
 import com.nisum.userapi.application.port.in.*;
+import com.nisum.userapi.dto.UserPatchRequest;
 import com.nisum.userapi.dto.UserRequest;
 import com.nisum.userapi.dto.UserResponse;
 import com.nisum.userapi.exception.UserApiException;
@@ -32,14 +33,16 @@ public class UserControllerAdapter implements UsersApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Flux<UserResponse>>> listUsers(ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Flux<UserResponse>>> listUsers(Integer page, Integer size, ServerWebExchange exchange) {
+        int pageNum = page != null ? page - 1 : 0; // Convertir a 0-indexed
+        int sizeNum = size != null ? size : 20;
         return Mono.just(
-                ResponseEntity.ok(userApplicationService.list().map(mapper::toResponse))
+                ResponseEntity.ok(userApplicationService.list(pageNum, sizeNum).map(mapper::toResponse))
         );
     }
 
     @Override
-    public Mono<ResponseEntity<UserResponse>> patchUser(UUID id, Mono<UserRequest> userRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<UserResponse>> patchUser(UUID id, Mono<UserPatchRequest> userRequest, ServerWebExchange exchange) {
         return userRequest
                 .map(mapper::toEntity)
                 .flatMap(patch -> userApplicationService.patch(id, patch))

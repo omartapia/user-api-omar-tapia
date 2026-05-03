@@ -72,13 +72,27 @@
           }
         ],
         "url": {
-          "raw": "localhost:8080/users",
+          "raw": "localhost:8080/users?page=1&size=20",
           "host": [
             "localhost"
           ],
           "port": "8080",
           "path": [
             "users"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Número de página a recuperar (empieza en 1)",
+              "disabled": false
+            },
+            {
+              "key": "size",
+              "value": "20",
+              "description": "Cantidad de usuarios por página (máximo 100)",
+              "disabled": false
+            }
           ]
         }
       },
