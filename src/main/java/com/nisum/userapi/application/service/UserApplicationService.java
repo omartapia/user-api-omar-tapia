@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,9 +35,7 @@ public class UserApplicationService implements UserApplicationPort {
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
 
-    private final Mono<User> userNotFound = Mono.error(new UserApiException("No se han usuario(s)", HttpStatus.NOT_FOUND));
-
-    // CREATE
+    @Transactional
     @Override
     public Mono<User> create(User user) {
 
@@ -102,6 +101,7 @@ public class UserApplicationService implements UserApplicationPort {
                 .transformDeferred(RetryOperator.of(retry));
     }
 
+    @Transactional
     @Override
     public Mono<User> patch(UUID id, User patch) {
 
@@ -115,6 +115,7 @@ public class UserApplicationService implements UserApplicationPort {
                                     if (patch.getPassword() != null) existing.setPassword(patch.getPassword());
 
                                     existing.setModified(LocalDateTime.now());
+                                    existing.setActive(true);
 
                                     return userRepository.save(existing)
                                             .map(saved -> {
@@ -127,6 +128,7 @@ public class UserApplicationService implements UserApplicationPort {
                 .transformDeferred(RetryOperator.of(retry));
     }
 
+    @Transactional
     @Override
     public Mono<User> update(UUID id, User user) {
         return Mono.defer(() ->
@@ -138,6 +140,7 @@ public class UserApplicationService implements UserApplicationPort {
                                     existing.setEmail(user.getEmail());
                                     existing.setPassword(user.getPassword());
                                     existing.setModified(LocalDateTime.now());
+                                    user.setActive(true);
 
                                     return userRepository.save(existing)
                                             .flatMap(saved ->
