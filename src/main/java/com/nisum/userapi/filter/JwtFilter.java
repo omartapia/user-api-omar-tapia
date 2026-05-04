@@ -31,7 +31,7 @@ public class JwtFilter implements WebFilter {
 
     private static final Map<HttpMethod, Set<String>> PUBLIC_ENDPOINTS =
             Map.of(
-                    HttpMethod.POST, Set.of("/users"),
+                    HttpMethod.PUT, Set.of("/users"),
                     HttpMethod.GET, Set.of(
                             "/swagger-ui",
                             "/v3/api-docs"

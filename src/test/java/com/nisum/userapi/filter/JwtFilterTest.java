@@ -38,7 +38,7 @@ class JwtFilterTest {
     @Test
     void givenRequestWithoutAuthorizationHeaderWhenFilterThenContinuesChain() {
         // given
-        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/users"));
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.put("/users"));
         when(chain.filter(exchange)).thenReturn(Mono.empty());
 
         // when

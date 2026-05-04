@@ -7,7 +7,7 @@
   },
   "item": [
     {
-      "name": "Crear usuario (POST /users)",
+      "name": "Crear usuario (PUT /users)",
       "event": [
         {
           "listen": "test",
@@ -16,8 +16,7 @@
               "const response = pm.response.json();",
               "",
               "pm.environment.set(\"token\", response.token);",
-              "pm.environment.set(\"id\", response.id);",
-              ""
+              "pm.environment.set(\"id\", response.id);"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -27,13 +26,17 @@
         {
           "listen": "prerequest",
           "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
             "packages": {},
-            "type": "text/javascript"
+            "requests": {}
           }
         }
       ],
       "request": {
-        "method": "POST",
+        "method": "PUT",
         "header": [
           {
             "key": "Content-Type",
@@ -46,7 +49,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Juan Rodriguez\",\n  \"email\": \"juan@rodriguez.org\",\n  \"password\": \"hunter200\",\n  \"phones\": [\n    {\n      \"number\": \"1234567\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
+          "raw": "{\n  \"name\": \"Juan Rodriguez\",\n  \"email\": \"juan@rodriguez.orgs\",\n  \"password\": \"Hunter200\",\n  \"phones\": [\n    {\n      \"number\": \"1234567\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
         },
         "url": {
           "raw": "localhost:8080/users",
@@ -69,30 +72,26 @@
           {
             "key": "Authorization",
             "value": "Bearer {{token}}"
+          },
+          {
+            "key": "page",
+            "value": "0",
+            "type": "text"
+          },
+          {
+            "key": "size",
+            "value": "10",
+            "type": "text"
           }
         ],
         "url": {
-          "raw": "localhost:8080/users?page=1&size=20",
+          "raw": "localhost:8080/users",
           "host": [
             "localhost"
           ],
           "port": "8080",
           "path": [
             "users"
-          ],
-          "query": [
-            {
-              "key": "page",
-              "value": "1",
-              "description": "Número de página a recuperar (empieza en 1)",
-              "disabled": false
-            },
-            {
-              "key": "size",
-              "value": "20",
-              "description": "Cantidad de usuarios por página (máximo 100)",
-              "disabled": false
-            }
           ]
         }
       },
@@ -123,9 +122,9 @@
       "response": []
     },
     {
-      "name": "Actualizar usuario completo (PUT /users/{id})",
+      "name": "Actualizar usuario completo (POST /users/{id})",
       "request": {
-        "method": "PUT",
+        "method": "POST",
         "header": [
           {
             "key": "Content-Type",
@@ -138,7 +137,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Juan Actualizado\",\n  \"email\": \"juan@rodriguez.org\",\n  \"password\": \"hunter200\",\n  \"phones\": [\n    {\n      \"number\": \"999999\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
+          "raw": "{\n  \"name\": \"Juan Actualizado\",\n  \"email\": \"juan@rodriguez.org\",\n  \"password\": \"Hunt2000\",\n  \"phones\": [\n    {\n      \"number\": \"999999\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
         },
         "url": {
           "raw": "localhost:8080/users/{{id}}",

@@ -50,7 +50,7 @@ class UserControllerAdapterIntegrationTest {
         User saved = user(id, "Juan Rodriguez", "juan@rodriguez.org");
         when(userApplicationService.create(any(User.class))).thenReturn(Mono.just(saved));
 
-        webTestClient.post()
+        webTestClient.put()
                 .uri("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(validRequest())
@@ -134,7 +134,7 @@ class UserControllerAdapterIntegrationTest {
         when(userApplicationService.update(any(UUID.class), any(User.class)))
                 .thenReturn(Mono.just(user(id, "Juan Actualizado", "juan@rodriguez.org")));
 
-        webTestClient.put()
+        webTestClient.post()
                 .uri("/users/{id}", id)
                 .header("Authorization", "Bearer jwt-token")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -192,7 +192,7 @@ class UserControllerAdapterIntegrationTest {
 
     @Test
     void givenMalformedRequestWhenPostUsersThenReturnsBadRequest() {
-        webTestClient.post()
+        webTestClient.put()
                 .uri("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue("{\"name\":\"Juan Rodriguez\",")
@@ -205,7 +205,7 @@ class UserControllerAdapterIntegrationTest {
 
     @Test
     void givenInvalidEmailWhenPostUsersThenReturnsBadRequestErrorResponse() {
-        webTestClient.post()
+        webTestClient.put()
                 .uri("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(validRequest().email("invalid-email"))
@@ -221,7 +221,7 @@ class UserControllerAdapterIntegrationTest {
         when(userApplicationService.create(any(User.class)))
                 .thenReturn(Mono.error(new UserApiException("Formato de contraseña inválido", HttpStatus.BAD_REQUEST)));
 
-        webTestClient.post()
+        webTestClient.put()
                 .uri("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(validRequest().password("short"))
@@ -275,11 +275,11 @@ class UserControllerAdapterIntegrationTest {
     }
 
     @Test
-    void givenDuplicateEmailWhenPostUsersThenReturnsConflictErrorResponse() {
+    void givenDuplicateEmailWhenPuttUsersThenReturnsConflictErrorResponse() {
         when(userApplicationService.create(any(User.class)))
                 .thenReturn(Mono.error(new DuplicateKeyException("duplicate email")));
 
-        webTestClient.post()
+        webTestClient.put()
                 .uri("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(validRequest())
