@@ -52,7 +52,6 @@ public class UserCustomRepositoryAdapter implements UserCustomRepository {
                 .collectMultimap(r -> r.get("user_id", UUID.class))
                 .flatMapMany(map -> Flux.fromIterable(map.entrySet()))
                 .map(entry -> {
-                    UUID userId = entry.getKey();
                     List<Row> rows = entry.getValue().stream().toList();
                     return mapToUser(rows);
                 });
@@ -80,7 +79,7 @@ public class UserCustomRepositoryAdapter implements UserCustomRepository {
                             WHERE u.id = :id
                         """)
                 .bind("id", id)
-                .map((row, meta) -> row) // devolvemos directamente Row
+                .map((row, meta) -> row)
                 .all()
                 .collectList()
                 .flatMap(rows -> {
