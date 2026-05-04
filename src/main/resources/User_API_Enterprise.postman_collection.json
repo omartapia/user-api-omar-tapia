@@ -14,9 +14,10 @@
           "script": {
             "exec": [
               "const response = pm.response.json();",
-              "",
-              "pm.environment.set(\"token\", response.token);",
-              "pm.environment.set(\"id\", response.id);"
+              "if(response.token) {",
+              "    pm.environment.set(\"token\", response.token);",
+              "    pm.environment.set(\"id\", response.id);",
+              "}"
             ],
             "type": "text/javascript",
             "packages": {},
@@ -49,7 +50,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Juan Rodriguez\",\n  \"email\": \"juan@rodriguez.orgs\",\n  \"password\": \"Hunter200\",\n  \"phones\": [\n    {\n      \"number\": \"1234567\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
+          "raw": "{\n  \"name\": \"Juan Rodriguez\",\n  \"email\": \"juan@rodriguez.org\",\n  \"password\": \"Hunter2000\",\n  \"phones\": [\n    {\n      \"number\": \"1234567\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
         },
         "url": {
           "raw": "localhost:8080/users",
