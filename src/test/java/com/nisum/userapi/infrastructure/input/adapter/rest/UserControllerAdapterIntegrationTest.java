@@ -70,7 +70,7 @@ class UserControllerAdapterIntegrationTest {
         verify(userApplicationService).create(argThat(user ->
                 "Juan Rodriguez".equals(user.getName())
                         && "juan@rodriguez.org".equals(user.getEmail())
-                        && "hunter2".equals(user.getPassword())
+                        && "Hunter200".equals(user.getPassword())
                         && user.getPhones().size() == 1
         ));
     }
@@ -213,7 +213,7 @@ class UserControllerAdapterIntegrationTest {
                 .expectStatus().isBadRequest()
                 .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.mensaje").isEqualTo("Solicitud inválida");
+                .jsonPath("$.mensaje").isEqualTo("Formato de correo inválido");
     }
 
     @Test
@@ -308,7 +308,7 @@ class UserControllerAdapterIntegrationTest {
         return new UserRequest()
                 .name("Juan Rodriguez")
                 .email("juan@rodriguez.org")
-                .password("hunter2")
+                .password("Hunter200")
                 .phones(List.of(new PhoneRequest()
                         .number("1234567")
                         .citycode("1")
@@ -320,7 +320,7 @@ class UserControllerAdapterIntegrationTest {
         user.setId(id);
         user.setName(name);
         user.setEmail(email);
-        user.setPassword("hunter2");
+        user.setPassword("Abcdef12");
         user.setCreated(LocalDateTime.of(2026, 5, 1, 10, 0));
         user.setModified(LocalDateTime.of(2026, 5, 1, 10, 0));
         user.setLastLogin(LocalDateTime.of(2026, 5, 1, 10, 0));

@@ -28,7 +28,7 @@ paths:
                 value:
                   name: "Juan Rodriguez"
                   email: "juan@rodriguez.org"
-                  password: "hunter2"
+                  password: "Hunter200"
                   phones:
                     - number: "1234567"
                       citycode: "1"
@@ -214,7 +214,8 @@ components:
           example: "juan@rodriguez.org"
         password:
           type: string
-          example: "hunter2"
+          pattern: '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$'
+          example: "Hunter200"
         phones:
           type: array
           items:
@@ -232,7 +233,8 @@ components:
           example: "nuevo@correo.org"
         password:
           type: string
-          example: "hunter2"
+          pattern: '^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$'
+          example: "Hunter200"
         phones:
           type: array
           items:

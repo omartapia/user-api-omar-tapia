@@ -46,7 +46,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Juan Rodriguez\",\n  \"email\": \"juan@rodriguez.org\",\n  \"password\": \"hunter2\",\n  \"phones\": [\n    {\n      \"number\": \"1234567\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
+          "raw": "{\n  \"name\": \"Juan Rodriguez\",\n  \"email\": \"juan@rodriguez.org\",\n  \"password\": \"hunter200\",\n  \"phones\": [\n    {\n      \"number\": \"1234567\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
         },
         "url": {
           "raw": "localhost:8080/users",
@@ -138,7 +138,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Juan Actualizado\",\n  \"email\": \"juan@rodriguez.org\",\n  \"password\": \"hunter2\",\n  \"phones\": [\n    {\n      \"number\": \"999999\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
+          "raw": "{\n  \"name\": \"Juan Actualizado\",\n  \"email\": \"juan@rodriguez.org\",\n  \"password\": \"hunter200\",\n  \"phones\": [\n    {\n      \"number\": \"999999\",\n      \"citycode\": \"1\",\n      \"contrycode\": \"57\"\n    }\n  ]\n}"
         },
         "url": {
           "raw": "localhost:8080/users/{{id}}",

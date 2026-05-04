@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebInputException;
 
 
@@ -63,6 +64,45 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
+    }
+
+    @ExceptionHandler(WebExchangeBindException.class)
+    public ResponseEntity<ErrorResponse> handleWebExchangeBindException(
+            WebExchangeBindException ex) {
+        log.error("Error handleWebExchangeBindException: ", ex);
+        ErrorResponse error = new ErrorResponse();
+
+        String mensaje = determinateValidationErrorMessage(ex);
+        error.setMensaje(mensaje);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
+
+    private String determinateValidationErrorMessage(WebExchangeBindException ex) {
+
+        if (ex.getFieldErrors().stream()
+                .anyMatch(fieldError -> "password".equals(fieldError.getField()))) {
+            return "Formato de contraseña inválido";
+        }
+
+        if (ex.getFieldErrors().stream()
+                .anyMatch(fieldError -> "email".equals(fieldError.getField()))) {
+            return "Formato de correo inválido";
+        }
+
+        if (ex.getFieldErrors().stream()
+                .anyMatch(fieldError -> "name".equals(fieldError.getField()))) {
+            return "El nombre es requerido";
+        }
+
+        if (ex.getFieldErrors().stream()
+                .anyMatch(fieldError -> "phones".equals(fieldError.getField()))) {
+            return "Los teléfonos son requeridos y deben tener número, código de ciudad y código de país";
+        }
+
+        return "Solicitud inválida";
     }
 
     @ExceptionHandler(Throwable.class)
