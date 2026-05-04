@@ -45,7 +45,6 @@ dependencies {
     testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
     testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-    // Resilience4j for retries and circuit breakers
     implementation 'io.github.resilience4j:resilience4j-reactor:1.7.1'
     implementation 'io.github.resilience4j:resilience4j-retry:1.7.1'
     implementation 'io.github.resilience4j:resilience4j-circuitbreaker:1.7.1'
